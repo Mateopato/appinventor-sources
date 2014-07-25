@@ -136,6 +136,15 @@ Blockly.BlocklyEditor.startup = function(documentBody, formName) {
         // running any error handlers to avoid quadratic time behavior.
         Blockly.WarningHandler.determineDuplicateComponentEventHandlers();
   });
+
+  // Code Inventor event hook to monitor for change in block selection
+  Blockly.bindEvent_(Blockly.mainWorkspace.getCanvas(), 'blocklySelectChange', this,
+      function() {
+        if(window.parent.BlocklyPanel_blocklySelectChanged){
+          window.parent.BlocklyPanel_blocklySelectChanged(Blockly.BlocklyEditor.formName, Blockly.selected.id);
+        }
+        // May need to check for duplicate component event handlers as above
+  });
 };
 
 Blockly.BlocklyEditor.render = function() {

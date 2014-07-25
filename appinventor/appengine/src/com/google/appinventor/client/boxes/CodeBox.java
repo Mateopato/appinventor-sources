@@ -28,7 +28,7 @@ public final class CodeBox extends Box {
   private CodeBox() {
     super(MESSAGES.codeBoxCaption(),
          200,      // height
-         true,   // minimizable  TODO: make this horizontal minimizable
+         false,   // minimizable  TODO: make this horizontal minimizable
          false,   // removable
          false,   // startMinimized TODO: start minimized
          false,   // usePadding

@@ -299,6 +299,12 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Media")
   @Description("Caption for asset list box.")
   String assetListBoxCaption();
+  
+  // Used in boxes/CodeBox.java
+  
+  @DefaultMessage("Code")
+  @Description("Caption for code box.")
+  String codeBoxCaption();
 
   // Used in boxes/MessagesOutputBox.java
 

@@ -10,6 +10,7 @@ import static com.google.appinventor.client.Ode.MESSAGES;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.boxes.AssetListBox;
+import com.google.appinventor.client.boxes.CodeBox;
 import com.google.appinventor.client.boxes.PaletteBox;
 import com.google.appinventor.client.boxes.PropertiesBox;
 import com.google.appinventor.client.boxes.SourceStructureBox;
@@ -29,6 +30,7 @@ import com.google.appinventor.client.editor.youngandroid.palette.YoungAndroidPal
 import com.google.appinventor.client.explorer.SourceStructureExplorer;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.client.properties.json.ClientJsonParser;
+import com.google.appinventor.client.widgets.codeinventor.CodePanel;
 import com.google.appinventor.client.widgets.dnd.DropTarget;
 import com.google.appinventor.client.widgets.properties.EditableProperties;
 import com.google.appinventor.client.widgets.properties.PropertiesPanel;
@@ -94,6 +96,9 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
   // Panels that are used as the content of the palette and properties boxes.
   private final YoungAndroidPalettePanel palettePanel;
   private final PropertiesPanel designProperties;
+  
+  // Panel used as content of code box  TODO: add this to above category if it works
+  private final CodePanel codePanel;
 
   // UI elements
   private final SimpleVisibleComponentsPanel visibleComponentsPanel;
@@ -144,6 +149,9 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
     // Create designProperties, which will be used as the content of the PropertiesBox.
     designProperties = new PropertiesPanel();
     designProperties.setSize("100%", "100%");
+    
+    codePanel = new CodePanel();
+    codePanel.setSize("100%", "100%");
 
     initWidget(componentsPanel);
     setSize("100%", "100%");
@@ -243,6 +251,11 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
   @Override
   public SimplePalettePanel getComponentPalettePanel() {
     return palettePanel;
+  }
+  
+  @Override
+  public CodePanel getCodePanel() {
+    return codePanel;
   }
 
   @Override
@@ -479,6 +492,13 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
     propertiesBox.setContent(designProperties);
     updatePropertiesPanel(selectedComponent);
     propertiesBox.setVisible(true);
+    
+    // Set the code box's content.
+    CodeBox codeBox = CodeBox.getCodeBox();
+    codeBox.setContent(codePanel);
+    //codePanel.addCode("HAY I'M TESTING OVER HERE");
+    codePanel.addCode(encodeFormAsJsonString());
+    codeBox.setVisible(true);
 
     // Listen to changes on the form.
     form.addFormChangeListener(this);
@@ -595,6 +615,12 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
     PropertiesBox propertiesBox = PropertiesBox.getPropertiesBox();
     propertiesBox.clear();
     propertiesBox.setVisible(false);
+    
+    // Clear the code box for the Blocks screen
+    CodeBox codeBox = CodeBox.getCodeBox();
+    codeBox.clear();
+    codePanel.clear();
+    codeBox.setVisible(false);
   }
 
   /*

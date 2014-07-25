@@ -57,6 +57,8 @@ Blockly.Xml.workspaceToDom = function(workspace) {
 Blockly.Xml.blockToDom_ = function(block) {
   var element = goog.dom.createDom('block');
   element.setAttribute('type', block.type);
+  // Code Inventor uses id to check which block is selected
+  element.setAttribute('id', block.id);
   if (block.mutationToDom) {
     // Custom data for an advanced block.
     var mutation = block.mutationToDom();

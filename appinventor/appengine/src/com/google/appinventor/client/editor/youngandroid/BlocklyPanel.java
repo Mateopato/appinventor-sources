@@ -201,6 +201,11 @@ public class BlocklyPanel extends HTMLPanel {
       YaBlocksEditor.onBlocksAreaChanged(formName);
     }
   }
+  
+  private static void blocklySelectChanged(String formName, int selected) {
+    // potentially need to ignore selectChanged events as above in blocklyWorkspaceChanged
+    YaBlocksEditor.onBlocklySelectChanged(formName, selected);
+  }
 
   // Returns true if the blocks for formName have been initialized (i.e.,
   // no componentOps entry exists for formName).
@@ -694,9 +699,13 @@ public class BlocklyPanel extends HTMLPanel {
     callback.call(null, buttonName);
   }-*/;
 
+  
+  // Code Inventor -- added blocklySelectChanged event hook
   private static native void exportMethodsToJavascript() /*-{
     $wnd.BlocklyPanel_initBlocksArea =
       $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::initBlocksArea(Ljava/lang/String;));
+    $wnd.BlocklyPanel_blocklySelectChanged =
+      $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::blocklySelectChanged(Ljava/lang/String;I));
     $wnd.BlocklyPanel_blocklyWorkspaceChanged =
       $entry(@com.google.appinventor.client.editor.youngandroid.BlocklyPanel::blocklyWorkspaceChanged(Ljava/lang/String;));
     $wnd.BlocklyPanel_checkWarningState =

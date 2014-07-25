@@ -10,6 +10,7 @@ import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.boxes.AssetListBox;
 import com.google.appinventor.client.boxes.BlockSelectorBox;
+import com.google.appinventor.client.boxes.CodeBox;
 import com.google.appinventor.client.boxes.PaletteBox;
 import com.google.appinventor.client.editor.FileEditor;
 import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
@@ -21,6 +22,7 @@ import com.google.appinventor.client.editor.youngandroid.palette.YoungAndroidPal
 import com.google.appinventor.client.explorer.SourceStructureExplorer;
 import com.google.appinventor.client.explorer.SourceStructureExplorerItem;
 import com.google.appinventor.client.output.OdeLog;
+import com.google.appinventor.client.widgets.codeinventor.CodePanel;
 import com.google.appinventor.client.widgets.dnd.DropTarget;
 import com.google.appinventor.shared.rpc.project.FileDescriptorWithContent;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
@@ -72,6 +74,9 @@ public final class YaBlocksEditor extends FileEditor
 
   // Panel that is used as the content of the palette box
   private final YoungAndroidPalettePanel palettePanel;
+  
+  // Code panel
+  private final CodePanel codePanel;
 
   // Blocks area. Note that the blocks area is a part of the "document" in the
   // browser (via the deckPanel in the ProjectEditor). So if the document changes (which happens
@@ -148,6 +153,18 @@ public final class YaBlocksEditor extends FileEditor
       palettePanel = null;
       OdeLog.wlog("Can't get form editor for blocks: " + getFileId());
     }
+    
+    codePanel = new CodePanel();
+    
+    // Set the code box's content.
+    CodeBox codeBox = CodeBox.getCodeBox();
+    codeBox.setContent(codePanel);
+    //codePanel.addCode("HAY I'M TESTING OVER HERE");
+    codePanel.clear();
+    codePanel.addCode("<pre>" + getRawFileContent().replaceAll("<",  "&lt;").replaceAll(">", "&gt;") + "</pre>"); // TODO
+    //.replaceAll(" (<[^/])", "\n$1")
+    codeBox.setVisible(true);
+    codePanel.setSize("100%", "100%");
   }
 
   // FileEditor methods
@@ -212,6 +229,15 @@ public final class YaBlocksEditor extends FileEditor
       paletteBox.setContent(palettePanel);
     }
     PaletteBox.getPaletteBox().setVisible(false);
+
+    // Set the code box's content.
+    CodeBox codeBox = CodeBox.getCodeBox();
+    codeBox.setContent(codePanel);
+    //codePanel.addCode("HAY I'M EDITING BLOCKS OVER HERE");
+    codePanel.clear();
+    //codePanel.addCode("<pre>" + getRawFileContent().replaceAll("<",  "&lt;").replaceAll(">", "&gt;") + "</pre>");  // TODO
+    codePanel.addCode(getRawFileContent());  // TODO
+    codeBox.setVisible(true);
     
     // Update the source structure explorer with the tree of this form's components.
     MockForm form = getForm();
@@ -231,6 +257,16 @@ public final class YaBlocksEditor extends FileEditor
     } else {
       OdeLog.wlog("Can't get form editor for blocks: " + getFileId());
     }
+  }
+  
+  /**
+   * Code Inventor methods.
+   */
+  public void updateCodeInventor() {
+    codePanel.updateCode(getRawFileContent());
+  }
+  public void changeSelection(int selected) {
+    codePanel.changeSelection(selected);
   }
 
   @Override
@@ -271,6 +307,11 @@ public final class YaBlocksEditor extends FileEditor
     PaletteBox paletteBox = PaletteBox.getPaletteBox();
     paletteBox.clear();
     paletteBox.setVisible(true);
+    
+    CodeBox codeBox = CodeBox.getCodeBox();
+    codeBox.clear();
+    codePanel.clear();
+    codeBox.setVisible(false);
 
     Ode.getInstance().getWorkColumns().remove(Ode.getInstance().getStructureAndAssets().getWidget(0));
     Ode.getInstance().getWorkColumns().insert(Ode.getInstance().getStructureAndAssets(), 3);
@@ -288,8 +329,22 @@ public final class YaBlocksEditor extends FileEditor
     if (editor != null) {
       OdeLog.log("Got blocks area changed for " + formName);
       Ode.getInstance().getEditorManager().scheduleAutoSave(editor);
-      if (editor instanceof YaBlocksEditor)
+      if (editor instanceof YaBlocksEditor) {
         editor.sendComponentData();
+        editor.updateCodeInventor();  // Code Inventor call
+      }
+    }
+  }
+  
+  // Code Inventor addition
+  public static void onBlocklySelectChanged(String formName, int selected) {
+    YaBlocksEditor editor = formToBlocksEditor.get(formName);
+    
+    if(editor != null) {
+      OdeLog.log("Got selection changed for " + formName);
+      if(editor instanceof YaBlocksEditor) {
+        editor.changeSelection(selected);
+      }
     }
   }
 

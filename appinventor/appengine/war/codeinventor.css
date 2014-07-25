@@ -1,0 +1,53 @@
+/*
+Style sheet formatting for Code Inventor extension to App Inventor.
+
+@author Matt Dabney
+*/
+
+.controlblock {
+  color: #b18e35;
+}
+
+.logicblock {
+  color: #77ab41;
+}
+
+.mathblock {
+  color: #3f71b5;
+}
+
+.textblock {
+  color: #b32d5e;
+}
+
+.listsblock {
+  color: #49a6d4;
+}
+
+.colorsblock {
+  color: #7d7d7d;
+}
+
+.variablesblock {
+  color: #d05f2d;
+}
+
+.proceduresblock {
+  color: #7c5385;
+}
+
+.getterblock {
+  color: #439970;
+}
+
+.setterblock {
+  color: #266643;
+}
+
+.argumentsblock {
+  color: #de8f6c;
+}
+
+.selectedblock {
+  background-color: yellow;
+}

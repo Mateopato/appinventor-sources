@@ -9,6 +9,7 @@ import static com.google.appinventor.client.Ode.MESSAGES;
 
 import com.google.appinventor.client.boxes.AssetListBox;
 import com.google.appinventor.client.boxes.BlockSelectorBox;
+import com.google.appinventor.client.boxes.CodeBox;
 import com.google.appinventor.client.boxes.MessagesOutputBox;
 import com.google.appinventor.client.boxes.OdeLogBox;
 import com.google.appinventor.client.boxes.PaletteBox;
@@ -608,6 +609,11 @@ public class Ode implements EntryPoint {
     Box propertiesbox = PropertiesBox.getPropertiesBox();
     propertiesbox.setWidth("222px");
     workColumns.add(propertiesbox);
+    
+    Box codebox = CodeBox.getCodeBox();  // TODO: this is where the codebox is added
+    codebox.setWidth("350px");
+    workColumns.add(codebox);
+    
     //switchToBlocksButton.setHeight("650px");
     //workColumns.add(switchToBlocksButton);
     dVertPanel.add(workColumns);

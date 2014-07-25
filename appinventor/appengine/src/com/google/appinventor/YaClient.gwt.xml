@@ -29,6 +29,8 @@
   <inherits name="com.google.appinventor.common.CommonVersion" />
   <inherits name="com.google.common.annotations.Annotations" />
   <inherits name="com.allen_sauer.gwt.dnd.gwt-dnd" />
+  <!-- needed for CodeInventor XML parsing -->
+  <inherits name="com.google.gwt.xml.XML" />
 
   <!-- servlets -->
   <servlet path="/download" class="com.google.appinventor.server.DownloadServlet" />
