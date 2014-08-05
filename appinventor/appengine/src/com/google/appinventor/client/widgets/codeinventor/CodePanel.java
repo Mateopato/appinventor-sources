@@ -2,6 +2,11 @@ package com.google.appinventor.client.widgets.codeinventor;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Random;
+import java.util.Set;
+import java.util.TreeSet;
 
 import com.google.appinventor.client.editor.youngandroid.YaBlocksEditor;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -30,13 +35,22 @@ public class CodePanel extends Composite {
     component_event,
     component_set_get,
     controls_if,
-    math_compare,
-    math_number,
     logic_boolean,
     logic_false,
-    logic_true,
     logic_negate,
+    logic_compare,
     logic_operation,
+    logic_or,
+    math_number,
+    math_compare,
+    math_add,
+    math_subtract,
+    math_multiply,
+    math_division,
+    math_power,
+    math_random_int,
+    math_random_float,
+    math_random_set_seed,
     text_join,
     lexical_variable_get,
     lexical_variable_set,
@@ -75,6 +89,14 @@ public class CodePanel extends Composite {
   
   private static final String SELECTED_BLOCK_CSS_CLASS = "selectedblock";
   
+  private static final String INCLUDE_DELIMITER = "--INCLUDES--";
+  private static final String GLOBALS_DELIMITER = "--GLOBALS--";
+  
+  private static final String RANDOM_INCLUDE_PATH = "java.util.Random";
+  private static final String RANDOM_GENERATOR_NAME = "randomGenerator";
+  private static final String RANDOM_GENERATOR_INIT_PREFIX = "Random ";
+  private static final String RANDOM_GENERATOR_INIT_SUFFIX = " = new Random();";
+  
   private static final int VIEWER_WINDOW_OFFSET = 170;
   
   // UI elements
@@ -93,6 +115,11 @@ public class CodePanel extends Composite {
   private String xmlData = "";
   private int selectedBlockId;
   private boolean showXML = true;
+  
+  private Set<String> includes = new TreeSet<String>();
+  private Set<String> globals = new LinkedHashSet<String>();
+  
+  private boolean skipChildren = false;
   
   /**
    * Creates a new Code Panel.
@@ -124,7 +151,7 @@ public class CodePanel extends Composite {
     panel.add(secondHeader);
     
     firstHeaderScrollPanel = new ScrollPanel();
-    firstHeaderScrollPanel.setSize(panelWidth + "px", ((Window.getClientHeight() - VIEWER_WINDOW_OFFSET) * 9 / 10) + "px");
+    firstHeaderScrollPanel.setSize(panelWidth + "px", ((int) ((Window.getClientHeight() - VIEWER_WINDOW_OFFSET) * 8.5) / 10) + "px");
     //firstHeaderScrollPanel.setSize("500px", ((Window.getClientHeight() - VIEWER_WINDOW_OFFSET) * 6 / 10) + "px");
     firstHeader.add(firstHeaderScrollPanel);
     
@@ -225,7 +252,12 @@ public class CodePanel extends Composite {
         codeData += makeColorSpan(n.getNodeName(), "#881280") + " (" + makeAttributeString(n) + ")\n";
       }*/
       
+      codeData += INCLUDE_DELIMITER + "\n" + GLOBALS_DELIMITER + "\n"; 
+      
       codeData += visitNode(doc.getFirstChild(), 0);
+      
+      codeData = codeData.replace(INCLUDE_DELIMITER, buildIncludes());
+      codeData = codeData.replace(GLOBALS_DELIMITER, buildGlobals());
       
       codeData += "</pre>";
     } catch(DOMParseException e) {
@@ -369,51 +401,233 @@ public class CodePanel extends Composite {
                   int elseifs = getAttributeValueIfExists(mutation, "elseif") != null ? Integer.parseInt(getAttributeValueIfExists(mutation, "elseif")) : 0;
                   int elses = getAttributeValueIfExists(mutation, "else") != null ? Integer.parseInt(getAttributeValueIfExists(mutation, "else")) : 0;
                   
+                  // handle all if and else if blocks
                   for(int i = 0; i <= elseifs; ++i) {
-                    Node ifblock = getChildOfType(n, "value", i);
-                    Node doblock = getChildOfType(n, "statement", i);
+                    Node ifblock = getChildWithAttrValue(n, "value", "name", "IF" + i);
+                    Node doblock = getChildWithAttrValue(n, "statement", "name", "DO" + i);
                     
-                    
-                    str += indent(depth) + addCSSClass((i > 0 ? "} else " : "") + "if(", CONTROL_BLOCK_CSS_CLASS, blockId);
-                    // visit ifblock (inline)
+                    str += (i == 0 ? indent(depth) : "") + addCSSClass((i > 0 ? " else " : "") + "if(", CONTROL_BLOCK_CSS_CLASS, blockId);
+                    str += visitIfBlock(ifblock, i, depth);
                     str += addCSSClass(") {\n", CONTROL_BLOCK_CSS_CLASS, blockId);
-                    // visit doblock (depth + 1)
-                    str += indent(depth) + addCSSClass("}\n", CONTROL_BLOCK_CSS_CLASS, blockId);
+                    str += visitDoBlock(doblock, depth);
+                    str += indent(depth) + addCSSClass("}", CONTROL_BLOCK_CSS_CLASS, blockId);
                   }
+                  
+                  // handle else block
+                  if(elses == 1) {
+                    Node doblock = getChildWithAttrValue(n, "statement", "name", "ELSE");
+                    
+                    str += addCSSClass(" else {\n", CONTROL_BLOCK_CSS_CLASS, blockId);
+                    str += visitDoBlock(doblock, depth);
+                    str += indent(depth) + addCSSClass("}\n", CONTROL_BLOCK_CSS_CLASS, blockId);
+                  } else {
+                    str += "\n";
+                  }
+                // simple if statement with no if/else
                 } else {
-                  str += makeColorSpan("// NO MUTATION CHILD FOUND\n", "red");
+                  Node ifblock = getChildWithAttrValue(n, "value", "name", "IF0");
+                  Node doblock = getChildWithAttrValue(n, "statement", "name", "DO0");
+                  
+                  str += indent(depth) + addCSSClass("if(", CONTROL_BLOCK_CSS_CLASS, blockId);
+                  str += visitIfBlock(ifblock, 0, depth);
+                  str += addCSSClass(") {\n", CONTROL_BLOCK_CSS_CLASS, blockId);
+                  str += visitDoBlock(doblock, depth);
+                  str += indent(depth) + addCSSClass("}\n", CONTROL_BLOCK_CSS_CLASS, blockId);
                 }
+                
+                skipChildren = true;
                 
                 str += checkUncaughtChildren(n, new String[]{"mutation", "value", "statement", "next", "#text"});
                 
                 break;
-              case math_compare:
                 
-                break;
-              case math_number:
-                
-                break;
+              /* Logic blocks */
               case logic_boolean:
-                
-                break;
-              case logic_operation:
+                String logicBoolVal = getChildWithAttrValue(n, "title", "name", "BOOL").getFirstChild().getNodeValue();
+                str += addCSSClass(logicBoolVal.toLowerCase(), LOGIC_BLOCK_CSS_CLASS, blockId);
                 
                 break;
               case logic_false:
-                
-                break;
-              case logic_true:
+                String logicFalseVal = getChildWithAttrValue(n, "title", "name", "BOOL").getFirstChild().getNodeValue();
+                str += addCSSClass(logicFalseVal.toLowerCase(), LOGIC_BLOCK_CSS_CLASS, blockId);
                 
                 break;
               case logic_negate:
+                str += addCSSClass("!", LOGIC_BLOCK_CSS_CLASS, blockId);
                 
                 break;
+              case logic_compare:
+                Node leftLogic = getChildWithAttrValue(n, "value", "name", "A");
+                Node rightLogic = getChildWithAttrValue(n, "value", "name", "B");
+
+                // TODO: check if enclosing parentheses are necessary before adding them
+                str += addCSSClass("(", LOGIC_BLOCK_CSS_CLASS, blockId);
+                str += leftLogic != null ? visitNode(leftLogic, depth) : "/* left side of comparison */";
+                str += " " + addCSSClass(blockToLogicOperator(n), LOGIC_BLOCK_CSS_CLASS, blockId) + " ";
+                str += rightLogic != null ? visitNode(rightLogic, depth) : "/* right side of comparison */";
+                str += addCSSClass(")", LOGIC_BLOCK_CSS_CLASS, blockId);
+                
+                skipChildren = true;
+                
+                break;
+              case logic_operation:
+              case logic_or:
+                Node leftAnd = getChildWithAttrValue(n, "value", "name", "A");
+                Node rightAnd = getChildWithAttrValue(n, "value", "name", "B");
+
+                // TODO: check if enclosing parentheses are necessary before adding them
+                str += addCSSClass("(", LOGIC_BLOCK_CSS_CLASS, blockId);
+                str += leftAnd != null ? visitNode(leftAnd, depth) : "/* left side of logic operation */";
+                str += " " + addCSSClass(blockToLogicOperator(n), LOGIC_BLOCK_CSS_CLASS, blockId) + " ";
+                str += rightAnd != null ? visitNode(rightAnd, depth) : "/* right side of logic operation */";
+                str += addCSSClass(")", LOGIC_BLOCK_CSS_CLASS, blockId);
+                
+                skipChildren = true;
+                
+                break;
+                
+              /* Math blocks */
+              case math_number:
+                String number = getChildWithAttrValue(n, "title", "name", "NUM").getFirstChild().getNodeValue();
+                str += addCSSClass(number, MATH_BLOCK_CSS_CLASS, blockId);
+                
+                break;
+              case math_compare:
+                Node left = getChildWithAttrValue(n, "value", "name", "A");
+                Node right = getChildWithAttrValue(n, "value", "name", "B");
+
+                // TODO: check if enclosing parentheses are necessary before adding them
+                str += addCSSClass("(", MATH_BLOCK_CSS_CLASS, blockId);
+                str += left != null ? visitNode(left, depth) : "/* left side of comparison */";
+                str += " " + addCSSClass(blockToMathOperator(n), MATH_BLOCK_CSS_CLASS, blockId) + " ";
+                str += right != null ? visitNode(right, depth) : "/* right side of comparison */";
+                str += addCSSClass(")", MATH_BLOCK_CSS_CLASS, blockId);
+                
+                skipChildren = true;
+                
+                break;
+              case math_add:
+                int additions = Integer.parseInt(getChildOfType(n, "mutation", 0).getAttributes().getNamedItem("items").getNodeValue());
+                
+                // TODO: check if enclosing parentheses are necessary before adding them
+                str += addCSSClass("(", MATH_BLOCK_CSS_CLASS, blockId);
+                
+                for(int i = 0; i < additions; i++) {
+                  if(i > 0) {
+                    str += addCSSClass(" + ", MATH_BLOCK_CSS_CLASS, blockId);
+                  }
+                  
+                  Node addChild = getChildWithAttrValue(n, "value", "name", "NUM" + i);
+                  
+                  str += addChild != null ? visitNode(addChild, depth) : "/* no value specified */"; 
+                }
+
+                str += addCSSClass(")", MATH_BLOCK_CSS_CLASS, blockId);
+                
+                skipChildren = true;
+                
+                break;
+              case math_subtract:
+                Node minuend = getChildWithAttrValue(n, "value", "name", "A");
+                Node subtrahend = getChildWithAttrValue(n, "value", "name", "B");
+
+                // TODO: check if enclosing parentheses are necessary before adding them
+                str += addCSSClass("(", MATH_BLOCK_CSS_CLASS, blockId);
+                str += minuend != null ? visitNode(minuend, depth) : "/* no value specified */";
+                str += addCSSClass(" - ", MATH_BLOCK_CSS_CLASS, blockId);
+                str += subtrahend != null ? visitNode(subtrahend, depth) : "/* no value specified */";
+                str += addCSSClass(")", MATH_BLOCK_CSS_CLASS, blockId);
+                
+                skipChildren = true;
+                
+                break;
+              case math_multiply:
+                int multiplications = Integer.parseInt(getChildOfType(n, "mutation", 0).getAttributes().getNamedItem("items").getNodeValue());
+                
+                // TODO: check if enclosing parentheses are necessary before adding them
+                str += addCSSClass("(", MATH_BLOCK_CSS_CLASS, blockId);
+                
+                for(int i = 0; i < multiplications; i++) {
+                  if(i > 0) {
+                    str += addCSSClass(" * ", MATH_BLOCK_CSS_CLASS, blockId);
+                  }
+                  
+                  Node multiplyChild = getChildWithAttrValue(n, "value", "name", "NUM" + i);
+                  
+                  str += multiplyChild != null ? visitNode(multiplyChild, depth) : "/* no value specified */"; 
+                }
+
+                str += addCSSClass(")", MATH_BLOCK_CSS_CLASS, blockId);
+                
+                skipChildren = true;
+                
+                break;
+              case math_division:
+                Node dividend = getChildWithAttrValue(n, "value", "name", "A");
+                Node divisor = getChildWithAttrValue(n, "value", "name", "B");
+
+                // TODO: check if enclosing parentheses are necessary before adding them
+                str += addCSSClass("(", MATH_BLOCK_CSS_CLASS, blockId);
+                str += dividend != null ? visitNode(dividend, depth) : "/* no value specified */";
+                str += addCSSClass(" / ", MATH_BLOCK_CSS_CLASS, blockId);
+                str += divisor != null ? visitNode(divisor, depth) : "/* no value specified */";
+                str += addCSSClass(")", MATH_BLOCK_CSS_CLASS, blockId);
+                
+                skipChildren = true;
+                
+                break;
+              case math_power:
+                Node base = getChildWithAttrValue(n, "value", "name", "A");
+                Node power = getChildWithAttrValue(n, "value", "name", "B");
+                
+                // TODO: Math.pow returns a double, may need to cast as an int
+                str += addCSSClass("Math.pow(", MATH_BLOCK_CSS_CLASS, blockId);
+                str += base != null ? visitNode(base, depth) : "/* no value specified */";
+                str += addCSSClass(", ", MATH_BLOCK_CSS_CLASS, blockId);
+                str += power != null ? visitNode(power, depth) : "/* no value specified */";
+                str += addCSSClass(")", MATH_BLOCK_CSS_CLASS, blockId);
+                
+                skipChildren = true;
+                
+                break;
+              case math_random_int:
+                Node randomMin = getChildWithAttrValue(n, "value", "name", "FROM");
+                Node randomMax = getChildWithAttrValue(n, "value", "name", "TO");
+
+                addInclude(RANDOM_INCLUDE_PATH);
+                addGlobal(RANDOM_GENERATOR_INIT_PREFIX + RANDOM_GENERATOR_NAME + RANDOM_GENERATOR_INIT_SUFFIX);
+                // TODO: get rid of _randomGenerator if the last block using it is deleted!
+                
+                str += addCSSClass("(" + RANDOM_GENERATOR_NAME + ".nextInt(", MATH_BLOCK_CSS_CLASS, blockId);
+                str += randomMax != null ? visitNode(randomMax, depth) : "/* random max */";
+                str += addCSSClass(" - ", MATH_BLOCK_CSS_CLASS, blockId);
+                str += randomMin != null ? visitNode(randomMin, depth) : "/* random min */";
+                str += addCSSClass(") + ", MATH_BLOCK_CSS_CLASS, blockId);
+                str += randomMin != null ? visitNode(randomMin, depth) : "/* random min */";
+                str += addCSSClass(")", MATH_BLOCK_CSS_CLASS, blockId);
+                
+                skipChildren = true;
+                
+                break;
+              case math_random_float:
+                addInclude(RANDOM_INCLUDE_PATH);
+                addGlobal(RANDOM_GENERATOR_INIT_PREFIX + RANDOM_GENERATOR_NAME + RANDOM_GENERATOR_INIT_SUFFIX);
+                
+                str+= addCSSClass(RANDOM_GENERATOR_NAME + ".nextDouble()", MATH_BLOCK_CSS_CLASS, blockId);
+
+                break;
+              case math_random_set_seed:
+                break;
+                
+              /* Text blocks */
               case text_join:
                 break;
               case lexical_variable_get:
                 break;
               case lexical_variable_set:
                 break;
+                
+              /* Procedures blocks */
               case procedures_defnoreturn:
                 
                 break;
@@ -452,9 +666,28 @@ public class CodePanel extends Composite {
             
           }*/
         }
-        
-        for(int i = 0; n.hasChildNodes() && i < n.getChildNodes().getLength(); ++i) {
-          str += visitNode(n.getChildNodes().item(i), depth + 1);
+
+        if(!skipChildren) {
+          for(int i = 0; n.hasChildNodes() && i < n.getChildNodes().getLength(); ++i) {
+            str += visitNode(n.getChildNodes().item(i), depth + 1);
+          }
+        } else {
+          skipChildren = false;
+          
+          // VVV MAKE SURE TO LEAVE THIS WHEN YOU REMOVE THE SKIPCHILDREN VARIABLE VVV
+          
+          // need to handle next blocks here
+          Node nextNode = getChildOfType(n, "next", 0);
+          
+          if(nextNode != null) {
+            Node nextBlock = getChildOfType(nextNode, "block", 0);
+            
+            if(nextBlock != null) {
+              str += visitNode(nextBlock, depth);
+            }
+          }
+
+          // ^^^ MAKE SURE TO LEAVE THIS WHEN YOU REMOVE THE SKIPCHILDREN VARIABLE ^^^
         }
         
         if(!postText.isEmpty()) {
@@ -466,6 +699,58 @@ public class CodePanel extends Composite {
       default:
         return "Found uncaught Node type: " + n.getNodeType() + " for node: " + n.getNodeName() + "\n";
     }
+  }
+  
+  private String visitIfBlock(Node ifblock, int blockNumber, int depth) {
+    String str = "";
+    
+    // if condition
+    if(ifblock != null) {
+      // do this inline
+      //str += "condition" + blockNumber + " exists";
+      str += visitNode(ifblock, depth);
+    } else {
+      str += "/* NO CONDITION" + blockNumber + " */";
+    }
+    
+    return str;
+  }
+  
+  private String visitDoBlock(Node doblock, int depth) {
+    String str = "";
+    
+    // do block
+    if(doblock != null) {
+      // visit doblock (depth + 1)
+      //str += indent(depth + 1) + "// DO" + blockNumber + " exists!\n";
+      str += visitNode(doblock, depth);
+    } else {
+      str += indent(depth + 1) + "// nothing to do here!\n";
+    }
+    
+    return str;
+  }
+  
+  private String blockToMathOperator(Node block) {
+    HashMap<String, String> operators = new HashMap<String, String>();
+    operators.put("EQ", "==");
+    operators.put("NEQ", "!=");
+    operators.put("LT", "<");
+    operators.put("LTE", "<=");
+    operators.put("GT", ">");
+    operators.put("GTE", ">=");
+    
+    return operators.get(getChildOfType(block, "title", 0).getFirstChild().getNodeValue());
+  }
+  
+  private String blockToLogicOperator(Node block) {
+    HashMap<String, String> operators = new HashMap<String, String>();
+    operators.put("EQ", "==");
+    operators.put("NEQ", "!=");
+    operators.put("AND", "&&");
+    operators.put("OR", "||");
+    
+    return operators.get(getChildOfType(block, "title", 0).getFirstChild().getNodeValue());
   }
   
   private Node getChildOfType(Node n, String name, int sibling) {
@@ -488,6 +773,38 @@ public class CodePanel extends Composite {
     } else {
       return null;
     }
+  }
+  
+  private int childrenOfType(Node n, String name) {
+    int count = 0;
+    
+    if(n.hasChildNodes()) {
+      for(int i = 0; i < n.getChildNodes().getLength(); ++i) {
+        Node child = n.getChildNodes().item(i);
+        
+        if(child.getNodeName().compareTo(name) == 0) {
+            count++;
+        }
+      }
+      
+    }
+    
+    return count;
+  }
+  
+  private Node getChildWithAttrValue(Node n, String nodeName, String attr, String value) {
+    if(n.hasChildNodes()) {
+      for(int i = 0; i < n.getChildNodes().getLength(); ++i) {
+        if(n.getChildNodes().item(i).getNodeName().compareTo(nodeName) == 0 &&
+            n.getChildNodes().item(i).getAttributes() != null &&
+            n.getChildNodes().item(i).getAttributes().getNamedItem(attr) != null &&
+            n.getChildNodes().item(i).getAttributes().getNamedItem(attr).getNodeValue().compareTo(value) == 0) {
+          return n.getChildNodes().item(i);
+        }
+      }
+    }
+    
+    return null;
   }
   
   private String checkUncaughtChildren(Node n, final String[] childTypes) {
@@ -514,8 +831,41 @@ public class CodePanel extends Composite {
     return str;
   }
   
+  // TODO: tie includes and globals to blocks for highlighting
+  private void addInclude(String includePath) {
+    if(!includes.contains(includePath)) {
+      includes.add(includePath);
+    }
+  }
+  
+  private String buildIncludes() {
+    String includeStr = "";
+    
+    for(String str : includes) {
+      includeStr += "include " + str + ";\n";
+    }
+    
+    return includeStr;
+  }
+  
+  private void addGlobal(String globalDefinition) {
+    if(!globals.contains(globalDefinition)) {
+      globals.add(globalDefinition);
+    }
+  }
+  
+  private String buildGlobals() {
+    String globalStr = "";
+    
+    for(String str : globals) {
+      globalStr += str + "\n";
+    }
+    
+    return globalStr;
+  }
+  
   private String indent(int depth) {
-    return multiplyChars(' ', depth);
+    return multiplyChars(' ', depth * 2);
   }
   
   private String multiplyChars(char c, int num) {
