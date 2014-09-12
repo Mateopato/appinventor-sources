@@ -48,6 +48,14 @@ Style sheet formatting for Code Inventor extension to App Inventor.
   color: #de8f6c;
 }
 
+.commentsection {
+  color: #3f7f5f;
+}
+
 .selectedblock {
   background-color: yellow;
+}
+
+.selectedinnerblock {
+  background-color: LightGoldenRodYellow;
 }
