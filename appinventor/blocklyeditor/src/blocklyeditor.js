@@ -141,7 +141,10 @@ Blockly.BlocklyEditor.startup = function(documentBody, formName) {
   Blockly.bindEvent_(Blockly.mainWorkspace.getCanvas(), 'blocklySelectChange', this,
       function() {
         if(window.parent.BlocklyPanel_blocklySelectChanged){
-          window.parent.BlocklyPanel_blocklySelectChanged(Blockly.BlocklyEditor.formName, Blockly.selected.id);
+          if(Blockly.selected)
+            window.parent.BlocklyPanel_blocklySelectChanged(Blockly.BlocklyEditor.formName, Blockly.selected.id);
+          else
+            window.parent.BlocklyPanel_blocklySelectChanged(Blockly.BlocklyEditor.formName, -1);
         }
         // May need to check for duplicate component event handlers as above
   });
