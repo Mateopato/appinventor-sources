@@ -12,7 +12,6 @@ import java.util.TreeMap;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.thirdparty.streamhtmlparser.util.HtmlUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
@@ -139,6 +138,18 @@ public class CodePanel extends Composite {
   public enum EventNames {
     Initialize,   // screen initialization
     Click,        // button click
+  }
+  
+  public enum PrimitiveType {
+    Boolean,
+    Text,
+    Integer,
+    Decimal,
+    Number,
+    List,
+    Color,
+    Unknown,
+    None,
   }
   
   private static final String PACKAGE_NAME = "codeinventor.generated";
@@ -322,7 +333,7 @@ public class CodePanel extends Composite {
    */
   public void addCode(String text) {
     codeData += text;
-    OdeLog.log("XML:\n\n" + text);
+    //OdeLog.log("XML:\n\n" + text);
     
     try {
       Document doc = XMLParser.parse(codeData);
@@ -372,6 +383,7 @@ public class CodePanel extends Composite {
   private String visitNode(Node n, int depth) {
     // determine the type of the XML node 
     String blockType = "";
+    String comment = getNodeComment(n);  // TODO: add comment in correct location for each block type
     
     switch(n.getNodeType()) {
       case Node.TEXT_NODE:
@@ -513,14 +525,13 @@ public class CodePanel extends Composite {
                 String forStart = getChildText(n, depth, "START");
                 String forEnd = getChildText(n, depth, "END");
                 String forStep = getChildText(n, depth, "STEP");
-                String comment = getNodeComment(n);  // TODO: move this to top
                 childText = getChildText(n, depth + 1, "DO", indent(depth + 1) + "/* for loop body */", "statement");
 
                 // TODO: this solution is pretty ugly. Any way to make it better?
                 //        forStep > 0 ? index <= forEnd : index >= forEnd
                 
-                OdeLog.log("Comment is: <testing></testing>" + comment);
-                if(comment != null) str += indent(depth) + "// " + comment + "\n";
+                //if(comment != null) str += indent(depth) + addCSSClass("// " + comment, COMMENT_CSS_CLASS, blockId) + "\n";
+                str += createCommentString(comment, false, blockId, depth);
                 
                 str += indent(depth) + addCSSClass("for(int ", CONTROL_BLOCK_CSS_CLASS, blockId);
                 str += addInnerSelectionClass(forIndexName, blockId);
@@ -598,6 +609,9 @@ public class CodePanel extends Composite {
                 childText = getChildText(n, depth + 1, "STM", "/* value */", "statement");
                 String ctrlDoReturnValue = getChildText(n, depth, "VALUE");
                 
+                // TODO: if I go this route, just remove the block from Code Inventor
+                str += addCSSClass("/* This block is not supported by Code Inventor */", COMMENT_CSS_CLASS, blockId);
+                
                 // TODO: implement this somehow if possible?
                 //   Options:
                 //     Create an interface like Runnable that returns an object
@@ -623,6 +637,8 @@ public class CodePanel extends Composite {
                 // TODO: add a note about why this will generate compile errors if they do something silly
                 //        Java is statically typed
                 //        Java can't execute expressions without evaluating the result
+                //
+                //        Only use this block to call procedures?
                 
                 str += indent(depth) + addInnerSelectionClass(childText, blockId) + ";\n";
                 
@@ -670,6 +686,9 @@ public class CodePanel extends Composite {
                 //   Maybe get(String key) and check it like math's is a number
                 //   Add an extra field in the bundle that tells the type!
                 // TODO: will need to remember the type of this like I do for variables?
+                
+                // this extracts the object out of the JSON-encoded string data passed to a new activity
+                
                 str += addCSSClass("getIntent().getExtras().get(\"" + OPEN_SCREEN_START_VALUE + "\")", CONTROL_BLOCK_CSS_CLASS, blockId);
                 
                 skipChildren = true;
@@ -696,10 +715,14 @@ public class CodePanel extends Composite {
                 skipChildren = true;
                 break;
               case controls_getPlainStartText:
+                // TODO: not implemented
+                
+                // this simply outputs the JSON-encoded string value of the start argument
                 
                 skipChildren = true;
                 break;
               case controls_closeScreenWithPlainText:
+                // TODO: not implemented
                 childText = getChildText(n, depth, "TEXT");
                 
                 skipChildren = true;
@@ -760,6 +783,11 @@ public class CodePanel extends Composite {
               case math_number:
                 String number = getTitleFromBlock(n);
                 str += addCSSClass(number, MATH_BLOCK_CSS_CLASS, blockId);
+                
+                //if(comment != null) str += " /* " + comment + " */";
+                str += createCommentString(comment, true, blockId, depth);
+                
+                skipChildren = true;
                 
                 break;
               case math_compare:
@@ -1335,32 +1363,6 @@ public class CodePanel extends Composite {
                 str += addInnerSelectionClass(childText, blockId);
                 str += addCSSClass(")))", COLORS_BLOCK_CSS_CLASS, blockId);
                 
-//                String splitFunc = "";
-                
-//                splitFunc += addCSSClass("private List _splitColor(String color) {\n", PROCEDURES_BLOCK_CSS_CLASS);
-//                splitFunc += addCSSClass("  // color will be formatted as 0xRRGGBB or 0xAARRGGBB\n", COMMENT_CSS_CLASS);
-//                splitFunc += addCSSClass("  // red starts at either position 2 or 4 in the String\n", COMMENT_CSS_CLASS);
-//                splitFunc += "  int redPosition = (color.length() == 8 ? 2 : 4);\n";
-//                splitFunc += "  List colorList = new ArrayList();\n";
-//                splitFunc += "\n";
-//                splitFunc += "  for(int i = redPosition; i < color.length(); i += 2) {\n";
-//                splitFunc += "    colorList.add(Integer.parseInt(color.substring(i, i + 2), 16));\n";
-//                splitFunc += "  }\n";
-//                splitFunc += "\n";
-//                splitFunc += addCSSClass("  // add alpha component if it exists\n", COMMENT_CSS_CLASS);
-//                splitFunc += "  if(color.length() == 10) {\n";
-//                splitFunc += "    colorList.add(Integer.parseInt(color.substring(2, 4));\n";
-//                splitFunc += "  }\n";
-//                splitFunc += "\n";
-//                splitFunc += "  return colorList;\n";
-//                splitFunc += addCSSClass("}\n", PROCEDURES_BLOCK_CSS_CLASS);
-      
-//                addFunction(splitFunc, blockId);
-//
-//                str += addCSSClass("_splitColor(", COLORS_BLOCK_CSS_CLASS, blockId);
-//                str += addInnerSelectionClass(childText, blockId);
-//                str += addCSSClass(")", COLORS_BLOCK_CSS_CLASS, blockId);
-                
                 skipChildren = true;
                 
                 break;
@@ -1826,6 +1828,16 @@ public class CodePanel extends Composite {
     return null;
   }
   
+  private String createCommentString(String comment, boolean isInline, int blockId, int depth) {
+    if(comment == null) return "";
+    
+    if(isInline) {
+      return addCSSClass(" /* " + comment + " */ ", COMMENT_CSS_CLASS, blockId); 
+    } else {
+      return indent(depth) + addCSSClass("// " + comment, COMMENT_CSS_CLASS, blockId) + "\n"; 
+    }
+  }
+  
   private Node getChildWithAttrValue(Node n, String nodeName, String attr, String value) {
     if(n == null) return null;
     
@@ -1873,6 +1885,12 @@ public class CodePanel extends Composite {
     if(titleChild == null || titleChild.getFirstChild() == null) return null;
     
     return titleChild.getFirstChild().getNodeValue();
+  }
+  
+  private PrimitiveType getPrimitiveType(Node n) {
+    
+    
+    return PrimitiveType.Unknown;
   }
   
   private String checkUncaughtChildren(Node n, final String[] childTypes) {
