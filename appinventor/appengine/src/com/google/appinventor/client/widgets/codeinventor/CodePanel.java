@@ -2122,32 +2122,6 @@ public class CodePanel extends Composite {
     
     return str.substring(0, str.length() - 2);
   }
-  
-  /**
-   * Adds class to blocks based on the type of block.
-   * 
-   * @param cc  CSS class to add to block of text
-   */
-//  private String addCSSClass(String str, String cc, int blockId) {
-//    cc += ((blockId == selectedBlockId) ? " " + SELECTED_BLOCK_CSS_CLASS : "");
-//    return "<span class='" + cc + "'>" + str + "</span>";
-//  }
-  
-//  private String addCSSClass(String str, String cc) {
-//    return "<span class='" + cc + "'>" + str + "</span>";
-//  }
-  
-//  private String addSelectionClass(String str, int blockId) {
-//    return "<span class='" + ((blockId == selectedBlockId) ? " " + SELECTED_BLOCK_CSS_CLASS : "") + "'>" + str + "</span>";
-//  }
-  
-//  private String addInnerSelectionClass(String str, int blockId) {
-//    return "<span class='" + ((blockId == selectedBlockId) ? " " + SELECTED_INNER_BLOCK_CSS_CLASS : "") + "'>" + str + "</span>";
-//  }
-  
-//  private String makeColorSpan(String str, String color) {
-//    return "<span style='color:" + color + "'>" + str + "</span>";
-//  }
 
   /**
    * Clears the text in the code buffer.
