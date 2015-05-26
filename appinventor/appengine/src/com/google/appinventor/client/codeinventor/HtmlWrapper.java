@@ -38,10 +38,10 @@ public class HtmlWrapper {
    * @param str  Code to add highlighting to
    * @param blockId  Block's ID value
    * @param selectedBlockId  ID value of the currently selected block
-   * @return  The value of str enclosed in a highlighted HTML span
+   * @return  If block is selected, the value of str enclosed in highlighting HTML span, otherwise str
    */
   public static String addSelectionClass(String str, int blockId, int selectedBlockId) {
-    return "<span class='" + ((blockId == selectedBlockId) ? " " + SELECTED_BLOCK_CSS_CLASS : "") + "'>" + str + "</span>";
+    return ((blockId == selectedBlockId) ? "<span class=' " + SELECTED_BLOCK_CSS_CLASS + "'>" + str + "</span>" : str);
   }
   
   /**
@@ -53,7 +53,7 @@ public class HtmlWrapper {
    * @return  The value of str enclosed in an inner block highlighted HTML span
    */
   public static String addInnerSelectionClass(String str, int blockId, int selectedBlockId) {
-    return "<span class='" + ((blockId == selectedBlockId) ? " " + SELECTED_INNER_BLOCK_CSS_CLASS : "") + "'>" + str + "</span>";
+    return ((blockId == selectedBlockId) ? "<span class=' " + SELECTED_INNER_BLOCK_CSS_CLASS + "'>" + str + "</span>" : str);
   }
   
   /**
