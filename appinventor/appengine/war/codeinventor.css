@@ -59,3 +59,8 @@ Style sheet formatting for Code Inventor extension to App Inventor.
 .selectedinnerblock {
   background-color: LightGoldenRodYellow;
 }
+
+.systemblock {
+  color: #7f0055;
+}
+}

@@ -155,11 +155,13 @@ public final class YaBlocksEditor extends FileEditor
     }
     
     codePanel = new CodePanel();
+    // TODO: remove this:
+    OdeLog.wlog("Form name is: " + blocksNode.getFormName());
+    OdeLog.wlog("Project id is: " + blocksNode.getProjectId());
     
     // Set the code box's content.
     CodeBox codeBox = CodeBox.getCodeBox();
     codeBox.setContent(codePanel);
-    //codePanel.addCode("HAY I'M TESTING OVER HERE");
     codePanel.clear();
     codePanel.addCode("<pre>" + getRawFileContent().replaceAll("<",  "&lt;").replaceAll(">", "&gt;") + "</pre>"); // TODO
     //.replaceAll(" (<[^/])", "\n$1")

@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import com.google.appinventor.client.Ode;
+import com.google.appinventor.client.codeinventor.ButtonComponent;
+import com.google.appinventor.client.codeinventor.HtmlWrapper;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -166,6 +169,7 @@ public class CodePanel extends Composite {
   private static final String SETTER_BLOCK_CSS_CLASS = "setterblock";
   private static final String ARGUMENTS_BLOCK_CSS_CLASS = "argumentsblock";
   private static final String COMMENT_CSS_CLASS = "commentsection";
+  private static final String SYSTEM_CSS_CLASS = "systemblock";
 
   private static final String SELECTED_BLOCK_CSS_CLASS = "selectedblock";
   private static final String SELECTED_INNER_BLOCK_CSS_CLASS = "selectedinnerblock";
@@ -173,6 +177,7 @@ public class CodePanel extends Composite {
   private static final String IMPORT_DELIMITER = "--IMPORTS--";
   private static final String GLOBALS_DELIMITER = "--GLOBALS--";
   private static final String FUNCTIONS_DELIMITER = "--FUNCTIONS--";
+  private static final String COMPONENTS_DELIMITER = "--COMPONENTS--";
   
   private static final String OPEN_SCREEN_START_VALUE = "startValue";
   
@@ -183,11 +188,17 @@ public class CodePanel extends Composite {
   
   private static final String BIG_DECIMAL_IMPORT_PATH = "java.math.BigDecimal";
 
+  private static final String ACTIVITY_IMPORT_PATH = "android.app.Activity";
+  private static final String BUNDLE_IMPORT_PATH = "android.os.Bundle";
+  
   private static final String ARRAYS_IMPORT_PATH = "java.util.Arrays";
   private static final String ARRAYLIST_IMPORT_PATH = "java.util.ArrayList";
   private static final String LIST_IMPORT_PATH = "java.util.List";
   private static final String PATTERN_IMPORT_PATH = "java.util.regex.Pattern";
   private static final String ANDROID_COLOR_IMPORT_PATH = "android.graphics.Color";
+  
+  private static final String BUTTON_IMPORT_PATH = "android.widget.Button";
+  private static final String CANVAS_IMPORT_PATH = "android.graphics.Canvas";
   
   private static final int VIEWER_WINDOW_OFFSET = 170;
   
@@ -203,18 +214,20 @@ public class CodePanel extends Composite {
   private final HTML test1;
   private final Label test2;
   
-  private String codeData;
+  private String codeData = "";
   private String xmlData = "";
-  private int selectedBlockId;
+  private int selectedBlockId = 0;
   private boolean showXML = true;
   
   private Map<String, Set<Integer>> imports = new TreeMap<String, Set<Integer>>();
   private Map<String, Set<Integer>> globals = new LinkedHashMap<String, Set<Integer>>();
   private Map<String, Set<Integer>> functions = new LinkedHashMap<String, Set<Integer>>();
+  private Map<String, Set<Integer>> components = new TreeMap<String, Set<Integer>>();
   
+  private Map<String, String> componentImportMap = new HashMap<String, String>(); // map component name to import statement
+  //private Map<Integer, Node> nodeIdMap = new HashMap<Integer, Node>();
+    
   private boolean skipChildren = false;
-  
-  // TODO: handle imports, globals, functions when deleting blocks
   
   /**
    * Creates a new Code Panel.
@@ -222,13 +235,14 @@ public class CodePanel extends Composite {
   public CodePanel() {
     int panelWidth = 330;
     
+    // TODO: move this to a function
+    componentImportMap.put("Button", BUTTON_IMPORT_PATH);
+    componentImportMap.put("Canvas", CANVAS_IMPORT_PATH);
+    
     // Initialize UI
     //ScrollPanel outerPanel = new ScrollPanel();
     VerticalPanel outerPanel = new VerticalPanel();
     outerPanel.setWidth(panelWidth + "px");
-    
-    selectedBlockId = 0;
-    codeData = "";
     
     componentName = new Label("UI XML Code");  // TODO: fix this and next line
     //componentName.setStyleName("ode-PropertiesComponentName");
@@ -275,32 +289,28 @@ public class CodePanel extends Composite {
     
     StringBuilder sb = new StringBuilder();
     
-    sb.append(htmlify("<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\n"));
-    sb.append(htmlify("  package=\"com.example.testapp\"\n"));
-    sb.append(htmlify("  android:versionCode=\"1\"\n"));
-    sb.append(htmlify("  android:versionName=\"1.0\" >\n\n"));
+    sb.append("<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\n");
+    sb.append("  package=\"com.example.testapp\"\n");
+    sb.append("  android:versionCode=\"1\"\n");
+    sb.append("  android:versionName=\"1.0\" >\n\n");
 
-    sb.append(htmlify("  <uses-sdk\n"));
-    sb.append(htmlify("    android:minSdkVersion=\"8\"\n"));
-    sb.append(htmlify("    android:targetSdkVersion=\"17\" />\n\n"));
+    sb.append("  <uses-sdk\n");
+    sb.append("    android:minSdkVersion=\"8\"\n");
+    sb.append("    android:targetSdkVersion=\"17\" />\n\n");
 
-    sb.append(htmlify("  <application\n"));
-    sb.append(htmlify("    android:allowBackup=\"true\"\n"));
-    sb.append(htmlify("    android:icon=\"@drawable/ic_launcher\"\n"));
-    sb.append(htmlify("    android:label=\"@string/app_name\"\n"));
-    sb.append(htmlify("    android:theme=\"@style/AppTheme\" >\n"));
-    sb.append(htmlify("  </application>\n\n"));
+    sb.append("  <application\n");
+    sb.append("    android:allowBackup=\"true\"\n");
+    sb.append("    android:icon=\"@drawable/ic_launcher\"\n");
+    sb.append("    android:label=\"@string/app_name\"\n");
+    sb.append("    android:theme=\"@style/AppTheme\" >\n");
+    sb.append("  </application>\n\n");
 
-    sb.append(htmlify("</manifest>"));
+    sb.append("</manifest>");
     
-    test1 = new HTML("<pre>" + sb.toString() + "</pre>");
+    test1 = new HTML("<pre>" + HtmlWrapper.htmlify(sb.toString()) + "</pre>");
     test2 = new Label("test2");
-    //firstHeader.add(codeLabel);
     firstHeaderScrollPanel.add(codeLabel);
-    //secondHeader.add(test1);
     secondHeaderScrollPanel.add(test1);
-    //secondHeader.add(test2);
-    //outerPanel.add(codeLabel);
     
     initWidget(outerPanel);
   }
@@ -337,8 +347,14 @@ public class CodePanel extends Composite {
     
     try {
       Document doc = XMLParser.parse(codeData);
-      NodeList nl = doc.getElementsByTagName("*");
-      Node n;
+      //NodeList nl = doc.getElementsByTagName("*");
+      //Node n;
+      
+      //nodeIdMap.clear();
+      imports.clear();
+      globals.clear();
+      functions.clear();
+      components.clear();
       
       codeData = "<pre>";
 
@@ -349,15 +365,36 @@ public class CodePanel extends Composite {
         codeData += makeColorSpan(n.getNodeName(), "#881280") + " (" + makeAttributeString(n) + ")\n";
       }*/
       
+      // TODO: add user and project to package name (edu.clemson.cs.codeinventor.<user>.<project>)
+      //   I can get this, but probably don't want it: OdeLog.wlog("User email is: " + Ode.getInstance().getUser().getUserEmail());
+      String projectSuffix = getProjectName() != null ? "." + getProjectName() : "";
+      codeData += addCSSClass("package", SYSTEM_CSS_CLASS) + " edu.clemson.cs.codeinventor" + projectSuffix + ";\n\n";
+      
+      addImport(ACTIVITY_IMPORT_PATH, -2);
+      addImport(BUNDLE_IMPORT_PATH, -2);
+      
       codeData += IMPORT_DELIMITER;
       codeData += GLOBALS_DELIMITER;
       
-      codeData += visitNode(doc.getFirstChild(), 0);
+      String screenName = getScreenName() != null ? getScreenName() : "";
+      codeData += addCSSClass("public class", SYSTEM_CSS_CLASS) + " " + screenName +" " + addCSSClass("extends", SYSTEM_CSS_CLASS) + " Activity {\n";
+      codeData += indent(1) + "@Override\n";
+      codeData += indent(1) + addCSSClass("protected void", SYSTEM_CSS_CLASS) + " onCreate(Bundle savedInstanceState) {\n";
+      codeData += indent(2) + addCSSClass("super", SYSTEM_CSS_CLASS) + ".onCreate(savedInstanceState);\n";
+      codeData += indent(2) + "setContentView(R.layout.activity_" + screenName + ");\n\n"; // TODO: lowercase screen name?
+      
+      codeData += COMPONENTS_DELIMITER;
+      
+      codeData += visitNode(doc.getFirstChild(), 1); // depth increases by 1 before code starts
 
+      codeData += indent(1) + "}\n"; // onCreate
+      codeData += "}\n";             // class
+      
       codeData += FUNCTIONS_DELIMITER;
       
       codeData = codeData.replace(IMPORT_DELIMITER, imports.isEmpty() ? "" : buildImports() + "\n");
       codeData = codeData.replace(GLOBALS_DELIMITER, globals.isEmpty() ? "" : buildGlobals() + "\n");
+      codeData = codeData.replace(COMPONENTS_DELIMITER,  components.isEmpty() ? "" : buildComponents() + "\n");
       codeData = codeData.replace(FUNCTIONS_DELIMITER,  functions.isEmpty() ? "" : "\n" + buildFunctions());
       
       codeData += "</pre>";
@@ -398,6 +435,10 @@ public class CodePanel extends Composite {
         int blockId = Integer.parseInt(getAttributeValueIfExists(n, "id", "-2"));  // blocklySelectChange returns -1 if no block is selected
         String str = showXML ? indent(depth) + addSelectionClass(makeColorSpan(n.getNodeName(), "#881280") + " (" + makeAttributeString(n) + ")", blockId) : "";
 
+//        if(blockId >= 0) {
+//          nodeIdMap.put(blockId, n);
+//        }
+        
         if(showXML && n.getNodeName().compareTo("title") != 0) str += "\n";
         
         if(n.getNodeName().compareTo("block") == 0) {
@@ -417,26 +458,39 @@ public class CodePanel extends Composite {
             String leftChildText;
             String rightChildText;
             
+            String instanceName;
+            String componentType;
+            
             switch(BlockTypes.valueOf(blockType)) {
               // when event block
               case component_event:
                 mutation = getChildOfType(n, "mutation", 0);
                 childBlock = getChildOfType(getChildWithAttrValue(n, "statement", "name", "DO"), "block", 0);
                 
-                if(mutation != null) {
-                  String eventName = getAttributeValueIfExists(mutation, "event_name");
-                  String instanceName = getAttributeValueIfExists(mutation, "instance_name");
-                  
-                  // TODO: more to do here depending on the type of event
-                  str += indent(depth) + addCSSClass("when " + instanceName + "." + eventName + "() {\n", CONTROL_BLOCK_CSS_CLASS, blockId);
+                String eventName = getAttributeValueIfExists(mutation, "event_name");
+                instanceName = getAttributeValueIfExists(mutation, "instance_name");
+                componentType = getAttributeValueIfExists(mutation, "component_type");
+                
+                if(componentImportMap.containsKey(componentType)) {
+                  addImport(componentImportMap.get(componentType), blockId);
                 } else {
-                  str += makeColorSpan("// NO MUTATION CHILD FOUND\n", "red");
+                  OdeLog.wlog("MISSING COMPONENT TYPE: " + componentType + ": " + componentImportMap.get(componentType));
                 }
                 
-                str += addInnerSelectionClass(childBlock != null ? visitNode(childBlock, depth + 1) : indent(depth + 1) + "/* body of event loop */\n", blockId);
-                str += indent(depth) + addCSSClass("}\n", CONTROL_BLOCK_CSS_CLASS, blockId);
+                addComponent(componentType + " " + instanceName + " = (" + componentType + ") findViewById(R.id." + instanceName + ");", blockId);
                 
-                str += checkUncaughtChildren(n, new String[]{"mutation", "title", "statement", "#text"});
+                // TODO: more to do here depending on the type of event
+                if(componentType.equals("Button")) {
+                  str += getEventHandlerSignature(instanceName, componentType, eventName, blockId, depth);
+                  str += addInnerSelectionClass(childBlock != null ? visitNode(childBlock, depth + 2) : indent(depth + 2) + "/* body of event loop */\n", blockId);
+                  str += indent(depth + 1) + addCSSClass("}\n", CONTROL_BLOCK_CSS_CLASS, blockId);
+                  str += indent(depth) + addCSSClass("});\n", CONTROL_BLOCK_CSS_CLASS, blockId);
+                } else {
+                  str += indent(depth) + addCSSClass("when " + instanceName + "." + eventName + "() {\n", CONTROL_BLOCK_CSS_CLASS, blockId);
+                  str += addInnerSelectionClass(childBlock != null ? visitNode(childBlock, depth + 1) : indent(depth + 1) + "/* body of event loop */\n", blockId);
+                  str += indent(depth) + addCSSClass("}\n", CONTROL_BLOCK_CSS_CLASS, blockId);
+                }
+                
                 skipChildren = true;
                 
                 break;
@@ -445,9 +499,9 @@ public class CodePanel extends Composite {
                 mutation = getChildOfType(n, "mutation", 0);
                 
                 if(mutation != null) {
-                  String componentType = getAttributeValueIfExists(mutation, "component_type");   // e.g., Label
+                  componentType = getAttributeValueIfExists(mutation, "component_type");   // e.g., Label
                   String propertyName = getAttributeValueIfExists(mutation, "property_name");     // e.g., BackgroundColor
-                  String instanceName = getAttributeValueIfExists(mutation, "instance_name");     // e.g., Label1 (custom name)
+                  instanceName = getAttributeValueIfExists(mutation, "instance_name");     // e.g., Label1 (custom name)
                   boolean isSet = getAttributeValueIfExists(mutation, "set_or_get").compareTo("set") == 0;
                   // TODO: is_generic
                   
@@ -1473,10 +1527,12 @@ public class CodePanel extends Composite {
                 leftChildText = getChildText(n, depth, "LIST");
                 rightChildText = getChildText(n, depth, "NUM");
                 
+                // TODO: add note about why -1 is here, highlight text in some way
+                
                 str += addInnerSelectionClass(leftChildText, blockId);
                 str += addCSSClass(".get(", LISTS_BLOCK_CSS_CLASS, blockId);
                 str += addInnerSelectionClass(rightChildText, blockId);
-                str += addCSSClass(")", LISTS_BLOCK_CSS_CLASS, blockId);
+                str += addCSSClass(" - 1)", LISTS_BLOCK_CSS_CLASS, blockId);
                 
                 skipChildren = true;
                 
@@ -1659,7 +1715,7 @@ public class CodePanel extends Composite {
                 
                 str += addCSSClass("_listFromCSVRow(", LISTS_BLOCK_CSS_CLASS, blockId);
                 str += addInnerSelectionClass(childText, blockId);
-                str += addCSSClass("", LISTS_BLOCK_CSS_CLASS, blockId);
+                str += addCSSClass(")", LISTS_BLOCK_CSS_CLASS, blockId);
                 
                 // add them all as strings?
                 
@@ -1820,7 +1876,7 @@ public class CodePanel extends Composite {
       for(int i = 0; i < n.getChildNodes().getLength(); ++i) {
         if(n.getChildNodes().item(i).getNodeName().compareTo("comment") == 0 &&
             n.getChildNodes().item(i).getFirstChild() != null) {
-          return htmlify(n.getChildNodes().item(i).getFirstChild().getNodeValue());
+          return HtmlWrapper.htmlify(n.getChildNodes().item(i).getFirstChild().getNodeValue());
         }
       }
     }
@@ -1917,7 +1973,6 @@ public class CodePanel extends Composite {
     return str;
   }
   
-  // TODO: tie imports and globals to blocks for highlighting
   private void addImport(String importPath, int blockId) {
     if(!imports.containsKey(importPath)) {
       Set<Integer> s = new HashSet<Integer>();
@@ -1933,7 +1988,7 @@ public class CodePanel extends Composite {
     
     for(String str : imports.keySet()) {
       Set<Integer> s = imports.get(str);
-      String thisImport = "import " + str + ";\n";
+      String thisImport = addCSSClass("import", SYSTEM_CSS_CLASS) + " " + str + ";\n";
       
       for(Integer i : s) {
         thisImport = addSelectionClass(thisImport, i);
@@ -1996,6 +2051,57 @@ public class CodePanel extends Composite {
       functionStr += thisFunction;
     }
     return functionStr;
+  }
+  
+  private void addComponent(String componentDefinition, int blockId) {
+    if(!components.containsKey(componentDefinition)) {
+      Set<Integer> s = new HashSet<Integer>();
+      s.add(new Integer(blockId));
+      components.put(componentDefinition, s);
+    } else {
+      components.get(componentDefinition).add(new Integer(blockId));
+    }
+  }
+  
+  private String buildComponents() {
+    String componentStr = "";
+    
+    for(String str : components.keySet()) {
+      Set<Integer> s = components.get(str);
+      String thisComponent = str + "\n";
+      
+      for(Integer i : s) {
+        thisComponent = addSelectionClass(thisComponent, i);
+      }
+      
+      componentStr += indent(2) + thisComponent;
+    }
+    
+    return componentStr;
+  }
+  
+  private String getEventHandlerSignature(String componentName, String componentType, String event, int blockId, int depth) {
+    //TODO: import View
+    String sig = "";
+    sig += indent(depth) + addCSSClass(componentName + ".setOn" + ButtonComponent.eventNameMap(event) + "Listener(new View.On" + event + "Listener() {\n", CONTROL_BLOCK_CSS_CLASS, blockId);
+    sig += indent(depth + 1) + addCSSClass("public void on" + ButtonComponent.eventNameMap(event) + "(" + ButtonComponent.eventParameterMap(event) + ") {\n", CONTROL_BLOCK_CSS_CLASS, blockId); 
+    return sig;
+  }
+  
+  private String getProjectName() {
+    try {
+      return Ode.getInstance().getProjectManager().getProject(Ode.getInstance().getCurrentFileEditor().getProjectId()).getProjectName();
+    } catch (Exception e) {
+      return null;
+    }
+  }
+  
+  private String getScreenName() {
+    try {
+      return Ode.getInstance().getCurrentYoungAndroidSourceNode().getFormName();
+    } catch (Exception e) {
+      return null;
+    }
   }
   
   private String indent(int depth) {
@@ -2066,7 +2172,16 @@ public class CodePanel extends Composite {
     }
   }
   
-  private String htmlify(String s) {
-    return s.replaceAll("<",  "&lt;").replaceAll(">", "&gt;");
+  /**
+   * Switches projects
+   * 
+   * @param projectName The name of the project we're switching to
+   */
+  public void switchProjects(String projectName) {
+    OdeLog.wlog("Project name is: " + projectName);
   }
+  
+//  private String htmlify(String s) {
+//    return s.replaceAll("<",  "&lt;").replaceAll(">", "&gt;");
+//  }
 }
