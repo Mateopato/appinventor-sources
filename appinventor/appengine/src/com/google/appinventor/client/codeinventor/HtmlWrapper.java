@@ -1,5 +1,7 @@
 package com.google.appinventor.client.codeinventor;
 
+import java.util.Arrays;
+
 public class HtmlWrapper {
   private static final String SELECTED_BLOCK_CSS_CLASS = "selectedblock";
   private static final String SELECTED_INNER_BLOCK_CSS_CLASS = "selectedinnerblock";
@@ -75,5 +77,27 @@ public class HtmlWrapper {
    */
   public static String htmlify(String s) {
     return s.replaceAll("<",  "&lt;").replaceAll(">", "&gt;");
+  }
+  
+  /**
+   * Returns a string of num c's
+   * 
+   * @param c  Character to multiply
+   * @param num  Number of characters desired
+   * @return  String containing num c's
+   */
+  public static String multiplyChars(char c, int num) {
+    char[] chars = new char[num];
+    Arrays.fill(chars, c);
+    return new String(chars);
+  }
+  
+  /**
+   * Adds spaces to indent depth layers
+   * @param depth  Number of layers to indent
+   * @return  String of depth * 2 spaces
+   */
+  public static String indent(int depth) {
+    return HtmlWrapper.multiplyChars(' ', depth * 2);
   }
 }
