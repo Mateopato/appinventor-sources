@@ -1,10 +1,12 @@
 package com.google.appinventor.client.widgets.codeinventor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -219,13 +221,16 @@ public class CodePanel extends Composite {
   private int selectedBlockId = 0;
   private boolean showXML = true;
   
+  // TODO: check ordering of globals--was LinkedHashMap, changed to TreeMap for sorting. See which looks better.
   private Map<String, Set<Integer>> imports = new TreeMap<String, Set<Integer>>();
-  private Map<String, Set<Integer>> globals = new LinkedHashMap<String, Set<Integer>>();
+  private Map<String, Set<Integer>> globals = new TreeMap<String, Set<Integer>>();
   private Map<String, Set<Integer>> functions = new LinkedHashMap<String, Set<Integer>>();
   private Map<String, Set<Integer>> components = new TreeMap<String, Set<Integer>>();
   
   private Map<String, String> componentImportMap = new HashMap<String, String>(); // map component name to import statement
   //private Map<Integer, Node> nodeIdMap = new HashMap<Integer, Node>();
+  
+  private Map<String, Map<String, Node>> componentEvents = new TreeMap<String, Map<String, Node>>();
     
   private boolean skipChildren = false;
   
@@ -355,6 +360,7 @@ public class CodePanel extends Composite {
       globals.clear();
       functions.clear();
       components.clear();
+      componentEvents.clear();
       
       codeData = "<pre>";
 
@@ -374,10 +380,12 @@ public class CodePanel extends Composite {
       addImport(BUNDLE_IMPORT_PATH, -2);
       
       codeData += IMPORT_DELIMITER;
-      codeData += GLOBALS_DELIMITER;
       
       String screenName = getScreenName() != null ? getScreenName() : "";
       codeData += HtmlWrapper.addCSSClass("public class", SYSTEM_CSS_CLASS) + " " + screenName +" " + HtmlWrapper.addCSSClass("extends", SYSTEM_CSS_CLASS) + " Activity {\n";
+      
+      codeData += GLOBALS_DELIMITER;
+      
       codeData += HtmlWrapper.indent(1) + "@Override\n";
       codeData += HtmlWrapper.indent(1) + HtmlWrapper.addCSSClass("protected void", SYSTEM_CSS_CLASS) + " onCreate(Bundle savedInstanceState) {\n";
       codeData += HtmlWrapper.indent(2) + HtmlWrapper.addCSSClass("super", SYSTEM_CSS_CLASS) + ".onCreate(savedInstanceState);\n";
@@ -386,9 +394,11 @@ public class CodePanel extends Composite {
       codeData += COMPONENTS_DELIMITER;
       
       codeData += visitNode(doc.getFirstChild(), 1); // depth increases by 1 before code starts
+      
+      codeData += processComponentEvents();  // TODO: add line space above if there's code in above visitNode call
 
-      codeData += HtmlWrapper.indent(1) + "}\n"; // onCreate
-      codeData += "}\n";             // class
+      codeData += HtmlWrapper.indent(1) + "}\n"; // end onCreate
+      codeData += "}\n";             // end class
       
       codeData += FUNCTIONS_DELIMITER;
       
@@ -415,6 +425,79 @@ public class CodePanel extends Composite {
     }
     
     return defaultValue;
+  }
+  
+  private String processComponentEvents() {
+    String str = "";
+    int depth = 2;
+    
+    for(String componentName : componentEvents.keySet()) {
+      boolean focusDone = false;
+      str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("/**\n" + HtmlWrapper.indent(depth) + " * " + componentName + " event handlers\n" + HtmlWrapper.indent(depth) + " */\n", COMMENT_CSS_CLASS);
+      
+      for(String eventName : componentEvents.get(componentName).keySet()) {
+        Node n = componentEvents.get(componentName).get(eventName);
+        Node mutation = getChildOfType(n, "mutation", 0);
+        Node childBlock = getChildOfType(getChildWithAttrValue(n, "statement", "name", "DO"), "block", 0);
+        
+        //String eventName = getAttributeValueIfExists(mutation, "event_name");
+        String instanceName = getAttributeValueIfExists(mutation, "instance_name");
+        String componentType = getAttributeValueIfExists(mutation, "component_type");
+        
+        int blockId = Integer.parseInt(getAttributeValueIfExists(n, "id", "-2"));  // blocklySelectChange returns -1 if no block is selected
+        
+        if(componentImportMap.containsKey(componentType)) {
+          addImport(componentImportMap.get(componentType), blockId);
+        } else {
+          OdeLog.wlog("MISSING COMPONENT TYPE: " + componentType);
+        }
+        
+        addGlobal(componentType + " " + instanceName + ";", blockId);
+        addComponent(instanceName + " = (" + componentType + ") findViewById(R.id." + instanceName + ");", blockId);
+        
+        if((eventName.equals("GotFocus") || eventName.equals("LostFocus"))) {
+          if(!focusDone) {
+            Node gotFocusChild = getChildOfType(getChildWithAttrValue(componentEvents.get(componentName).get("GotFocus"), "statement", "name", "DO"), "block", 0);
+            Node lostFocusChild = getChildOfType(getChildWithAttrValue(componentEvents.get(componentName).get("LostFocus"), "statement", "name", "DO"), "block", 0);
+            
+            int gotFocusId = Integer.parseInt(getAttributeValueIfExists(componentEvents.get(componentName).get("GotFocus"), "id", "-2"));
+            int lostFocusId = Integer.parseInt(getAttributeValueIfExists(componentEvents.get(componentName).get("LostFocus"), "id", "-2"));
+            
+            // TODO: obfuscate the variables so they don't conflict with a user variable?
+            // TODO: keep track of variables I've used to ensure no conflicts? -- v and hasFocus here
+            String hasFocusVar = "hasFocus";
+            String viewVar = "componentView";
+            str += HtmlWrapper.indent(depth) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass(componentName + ".setOnFocusChangeListener(new View.OnFocusChangeListener() {\n", CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
+            str += HtmlWrapper.indent(depth + 1) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("public void onFocusChange(View " + viewVar + ", boolean " + hasFocusVar + ") {\n", CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
+            str += HtmlWrapper.indent(depth + 2) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("if(" + hasFocusVar + ") {\n", CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
+            str += HtmlWrapper.addInnerSelectionClass(gotFocusChild != null ? visitNode(gotFocusChild, depth + 3) : HtmlWrapper.indent(depth + 3) + "/* when " + componentName + ".GotFocus event handler */\n", gotFocusId, selectedBlockId);
+            str += HtmlWrapper.indent(depth + 2) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("} else {\n", CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
+            str += HtmlWrapper.addInnerSelectionClass(lostFocusChild != null ? visitNode(lostFocusChild, depth + 3) : HtmlWrapper.indent(depth + 3) + "/* when " + componentName + ".LostFocus event handler */\n", lostFocusId, selectedBlockId);
+            str += HtmlWrapper.indent(depth + 2) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("}\n", CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
+            str += HtmlWrapper.indent(depth + 1) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("}\n", CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
+            str += HtmlWrapper.indent(depth) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("});\n", CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
+            
+            focusDone = true;
+          }
+        } else {
+          // TODO: more to do here depending on the type of event
+          if(componentType.equals("Button")) {
+            str += getEventHandlerSignature(instanceName, componentType, eventName, blockId, depth);
+            str += HtmlWrapper.addInnerSelectionClass(childBlock != null ? visitNode(childBlock, depth + 2) : HtmlWrapper.indent(depth + 2) + "/* when " + componentName + "." + eventName + " event handler */\n", blockId, selectedBlockId);
+            str += HtmlWrapper.indent(depth + 1) + HtmlWrapper.addCSSClass("}\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+            str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("});\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+          } else {
+            str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("when " + instanceName + "." + eventName + "() {\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+            str += HtmlWrapper.addInnerSelectionClass(childBlock != null ? visitNode(childBlock, depth + 1) : HtmlWrapper.indent(depth + 1) + "/* when " + componentName + "." + eventName + " event handler */\n", blockId, selectedBlockId);
+            str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("}\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+          }
+        }
+        
+        str += "\n";
+      }
+    }
+
+    return str.length() >= 2 ? str.substring(0, str.length() - 2) : str;
   }
   
   private String visitNode(Node n, int depth) {
@@ -465,30 +548,38 @@ public class CodePanel extends Composite {
               // when event block
               case component_event:
                 mutation = getChildOfType(n, "mutation", 0);
-                childBlock = getChildOfType(getChildWithAttrValue(n, "statement", "name", "DO"), "block", 0);
-                
+//                childBlock = getChildOfType(getChildWithAttrValue(n, "statement", "name", "DO"), "block", 0);
+//                
                 String eventName = getAttributeValueIfExists(mutation, "event_name");
                 instanceName = getAttributeValueIfExists(mutation, "instance_name");
                 componentType = getAttributeValueIfExists(mutation, "component_type");
+//                
+//                if(componentImportMap.containsKey(componentType)) {
+//                  addImport(componentImportMap.get(componentType), blockId);
+//                } else {
+//                  OdeLog.wlog("MISSING COMPONENT TYPE: " + componentType + ": " + componentImportMap.get(componentType));
+//                }
+//                
+//                addComponent(componentType + " " + instanceName + " = (" + componentType + ") findViewById(R.id." + instanceName + ");", blockId);
+//                
+//                // TODO: more to do here depending on the type of event
+//                if(componentType.equals("Button")) {
+//                  str += getEventHandlerSignature(instanceName, componentType, eventName, blockId, depth);
+//                  str += HtmlWrapper.addInnerSelectionClass(childBlock != null ? visitNode(childBlock, depth + 2) : HtmlWrapper.indent(depth + 2) + "/* body of event loop */\n", blockId, selectedBlockId);
+//                  str += HtmlWrapper.indent(depth + 1) + HtmlWrapper.addCSSClass("}\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+//                  str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("});\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+//                } else {
+//                  str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("when " + instanceName + "." + eventName + "() {\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+//                  str += HtmlWrapper.addInnerSelectionClass(childBlock != null ? visitNode(childBlock, depth + 1) : HtmlWrapper.indent(depth + 1) + "/* body of event loop */\n", blockId, selectedBlockId);
+//                  str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("}\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+//                }
                 
-                if(componentImportMap.containsKey(componentType)) {
-                  addImport(componentImportMap.get(componentType), blockId);
+                if(componentEvents.containsKey(instanceName)) {
+                  componentEvents.get(instanceName).put(eventName, n);
                 } else {
-                  OdeLog.wlog("MISSING COMPONENT TYPE: " + componentType + ": " + componentImportMap.get(componentType));
-                }
-                
-                addComponent(componentType + " " + instanceName + " = (" + componentType + ") findViewById(R.id." + instanceName + ");", blockId);
-                
-                // TODO: more to do here depending on the type of event
-                if(componentType.equals("Button")) {
-                  str += getEventHandlerSignature(instanceName, componentType, eventName, blockId, depth);
-                  str += HtmlWrapper.addInnerSelectionClass(childBlock != null ? visitNode(childBlock, depth + 2) : HtmlWrapper.indent(depth + 2) + "/* body of event loop */\n", blockId, selectedBlockId);
-                  str += HtmlWrapper.indent(depth + 1) + HtmlWrapper.addCSSClass("}\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
-                  str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("});\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
-                } else {
-                  str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("when " + instanceName + "." + eventName + "() {\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
-                  str += HtmlWrapper.addInnerSelectionClass(childBlock != null ? visitNode(childBlock, depth + 1) : HtmlWrapper.indent(depth + 1) + "/* body of event loop */\n", blockId, selectedBlockId);
-                  str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("}\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  TreeMap l = new TreeMap();
+                  l.put(eventName, n);
+                  componentEvents.put(instanceName, l);
                 }
                 
                 skipChildren = true;
@@ -1939,11 +2030,11 @@ public class CodePanel extends Composite {
     return titleChild.getFirstChild().getNodeValue();
   }
   
-  private PrimitiveType getPrimitiveType(Node n) {
-    
-    
-    return PrimitiveType.Unknown;
-  }
+//  private PrimitiveType getPrimitiveType(Node n) {
+//    
+//    
+//    return PrimitiveType.Unknown;
+//  }
   
   private String checkUncaughtChildren(Node n, final String[] childTypes) {
     String str = "";
@@ -1996,6 +2087,22 @@ public class CodePanel extends Composite {
     return importStr;
   }
   
+  /**
+   * Adds a global definition to the list of global definitions. This allows 
+   * multiple blocks that require creation of a global variable to exist 
+   * without defining the global variable more than once. Instead, 
+   * selection highlighting is added for each block that creates the global
+   * variable when creating the single instance.
+   * 
+   * Definitions include the variable type, name, initialization (if any), 
+   * and line-ending semicolon. E.g.,
+   * 
+   * Button button1;
+   * 
+   * @param globalDefinition  The definition of the global variable
+   * @param blockId  Current block ID to add to the list of IDs attached
+   *                   to this definition
+   */
   private void addGlobal(String globalDefinition, int blockId) {
     if(!globals.containsKey(globalDefinition)) {
       Set<Integer> s = new LinkedHashSet<Integer>();
@@ -2017,7 +2124,7 @@ public class CodePanel extends Composite {
         thisGlobal = HtmlWrapper.addSelectionClass(thisGlobal, i, selectedBlockId);
       }
       
-      globalStr += thisGlobal;
+      globalStr += HtmlWrapper.indent(1) + thisGlobal;
     }
     
     return globalStr;
@@ -2099,16 +2206,6 @@ public class CodePanel extends Composite {
       return null;
     }
   }
-  
-//  private String indent(int depth) {
-//    return HtmlWrapper.multiplyChars(' ', depth * 2);
-//  }
-  
-//  private String multiplyChars(char c, int num) {
-//    char[] chars = new char[num];
-//    Arrays.fill(chars, c);
-//    return new String(chars);
-//  }
   
   private String makeAttributeString(Node n) {
     String str = "";
