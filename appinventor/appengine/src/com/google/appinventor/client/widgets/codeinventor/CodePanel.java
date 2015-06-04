@@ -159,22 +159,8 @@ public class CodePanel extends Composite {
   
   private static final String PACKAGE_NAME = "codeinventor.generated";
   
-  private static final String CONTROL_BLOCK_CSS_CLASS = "controlblock";
-  private static final String LOGIC_BLOCK_CSS_CLASS = "logicblock";
-  private static final String MATH_BLOCK_CSS_CLASS = "mathblock";
-  private static final String TEXT_BLOCK_CSS_CLASS = "textblock";
-  private static final String LISTS_BLOCK_CSS_CLASS = "listsblock";
-  private static final String COLORS_BLOCK_CSS_CLASS = "colorsblock";
-  private static final String VARIABLES_BLOCK_CSS_CLASS = "variablesblock";
-  private static final String PROCEDURES_BLOCK_CSS_CLASS = "proceduresblock";
-  private static final String GETTER_BLOCK_CSS_CLASS = "getterblock";
-  private static final String SETTER_BLOCK_CSS_CLASS = "setterblock";
-  private static final String ARGUMENTS_BLOCK_CSS_CLASS = "argumentsblock";
-  private static final String COMMENT_CSS_CLASS = "commentsection";
-  private static final String SYSTEM_CSS_CLASS = "systemblock";
-
-  private static final String SELECTED_BLOCK_CSS_CLASS = "selectedblock";
-  private static final String SELECTED_INNER_BLOCK_CSS_CLASS = "selectedinnerblock";
+  public static final String SELECTED_BLOCK_CSS_CLASS = "selectedblock";
+  public static final String SELECTED_INNER_BLOCK_CSS_CLASS = "selectedinnerblock";
   
   private static final String IMPORT_DELIMITER = "--IMPORTS--";
   private static final String GLOBALS_DELIMITER = "--GLOBALS--";
@@ -374,7 +360,7 @@ public class CodePanel extends Composite {
       // TODO: add user and project to package name (edu.clemson.cs.codeinventor.<user>.<project>)
       //   I can get this, but probably don't want it: OdeLog.wlog("User email is: " + Ode.getInstance().getUser().getUserEmail());
       String projectSuffix = getProjectName() != null ? "." + getProjectName() : "";
-      codeData += HtmlWrapper.addCSSClass("package", SYSTEM_CSS_CLASS) + " edu.clemson.cs.codeinventor" + projectSuffix + ";\n\n";
+      codeData += HtmlWrapper.addCSSClass("package", HtmlWrapper.SYSTEM_CSS_CLASS) + " edu.clemson.cs.codeinventor" + projectSuffix + ";\n\n";
       
       addImport(ACTIVITY_IMPORT_PATH, -2);
       addImport(BUNDLE_IMPORT_PATH, -2);
@@ -382,13 +368,13 @@ public class CodePanel extends Composite {
       codeData += IMPORT_DELIMITER;
       
       String screenName = getScreenName() != null ? getScreenName() : "";
-      codeData += HtmlWrapper.addCSSClass("public class", SYSTEM_CSS_CLASS) + " " + screenName +" " + HtmlWrapper.addCSSClass("extends", SYSTEM_CSS_CLASS) + " Activity {\n";
+      codeData += HtmlWrapper.addCSSClass("public class", HtmlWrapper.SYSTEM_CSS_CLASS) + " " + screenName +" " + HtmlWrapper.addCSSClass("extends", HtmlWrapper.SYSTEM_CSS_CLASS) + " Activity {\n";
       
       codeData += GLOBALS_DELIMITER;
       
       codeData += HtmlWrapper.indent(1) + "@Override\n";
-      codeData += HtmlWrapper.indent(1) + HtmlWrapper.addCSSClass("protected void", SYSTEM_CSS_CLASS) + " onCreate(Bundle savedInstanceState) {\n";
-      codeData += HtmlWrapper.indent(2) + HtmlWrapper.addCSSClass("super", SYSTEM_CSS_CLASS) + ".onCreate(savedInstanceState);\n";
+      codeData += HtmlWrapper.indent(1) + HtmlWrapper.addCSSClass("protected void", HtmlWrapper.SYSTEM_CSS_CLASS) + " onCreate(Bundle savedInstanceState) {\n";
+      codeData += HtmlWrapper.indent(2) + HtmlWrapper.addCSSClass("super", HtmlWrapper.SYSTEM_CSS_CLASS) + ".onCreate(savedInstanceState);\n";
       codeData += HtmlWrapper.indent(2) + "setContentView(R.layout.activity_" + screenName + ");\n\n"; // TODO: lowercase screen name?
       
       codeData += COMPONENTS_DELIMITER;
@@ -433,7 +419,7 @@ public class CodePanel extends Composite {
     
     for(String componentName : componentEvents.keySet()) {
       boolean focusDone = false;
-      str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("/**\n" + HtmlWrapper.indent(depth) + " * " + componentName + " event handlers\n" + HtmlWrapper.indent(depth) + " */\n", COMMENT_CSS_CLASS);
+      str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("/**\n" + HtmlWrapper.indent(depth) + " * " + componentName + " event handlers\n" + HtmlWrapper.indent(depth) + " */\n", HtmlWrapper.COMMENT_CSS_CLASS);
       
       for(String eventName : componentEvents.get(componentName).keySet()) {
         Node n = componentEvents.get(componentName).get(eventName);
@@ -467,15 +453,15 @@ public class CodePanel extends Composite {
             // TODO: keep track of variables I've used to ensure no conflicts? -- v and hasFocus here
             String hasFocusVar = "hasFocus";
             String viewVar = "componentView";
-            str += HtmlWrapper.indent(depth) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass(componentName + ".setOnFocusChangeListener(new View.OnFocusChangeListener() {\n", CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
-            str += HtmlWrapper.indent(depth + 1) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("public void onFocusChange(View " + viewVar + ", boolean " + hasFocusVar + ") {\n", CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
-            str += HtmlWrapper.indent(depth + 2) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("if(" + hasFocusVar + ") {\n", CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
+            str += HtmlWrapper.indent(depth) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass(componentName + ".setOnFocusChangeListener(new View.OnFocusChangeListener() {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
+            str += HtmlWrapper.indent(depth + 1) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("public void onFocusChange(View " + viewVar + ", boolean " + hasFocusVar + ") {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
+            str += HtmlWrapper.indent(depth + 2) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("if(" + hasFocusVar + ") {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
             str += HtmlWrapper.addInnerSelectionClass(gotFocusChild != null ? visitNode(gotFocusChild, depth + 3) : HtmlWrapper.indent(depth + 3) + "/* when " + componentName + ".GotFocus event handler */\n", gotFocusId, selectedBlockId);
-            str += HtmlWrapper.indent(depth + 2) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("} else {\n", CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
+            str += HtmlWrapper.indent(depth + 2) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("} else {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
             str += HtmlWrapper.addInnerSelectionClass(lostFocusChild != null ? visitNode(lostFocusChild, depth + 3) : HtmlWrapper.indent(depth + 3) + "/* when " + componentName + ".LostFocus event handler */\n", lostFocusId, selectedBlockId);
-            str += HtmlWrapper.indent(depth + 2) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("}\n", CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
-            str += HtmlWrapper.indent(depth + 1) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("}\n", CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
-            str += HtmlWrapper.indent(depth) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("});\n", CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
+            str += HtmlWrapper.indent(depth + 2) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("}\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
+            str += HtmlWrapper.indent(depth + 1) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("}\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
+            str += HtmlWrapper.indent(depth) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("});\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
             
             focusDone = true;
           }
@@ -484,12 +470,12 @@ public class CodePanel extends Composite {
           if(componentType.equals("Button")) {
             str += getEventHandlerSignature(instanceName, componentType, eventName, blockId, depth);
             str += HtmlWrapper.addInnerSelectionClass(childBlock != null ? visitNode(childBlock, depth + 2) : HtmlWrapper.indent(depth + 2) + "/* when " + componentName + "." + eventName + " event handler */\n", blockId, selectedBlockId);
-            str += HtmlWrapper.indent(depth + 1) + HtmlWrapper.addCSSClass("}\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
-            str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("});\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+            str += HtmlWrapper.indent(depth + 1) + HtmlWrapper.addCSSClass("}\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+            str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("});\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
           } else {
-            str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("when " + instanceName + "." + eventName + "() {\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+            str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("when " + instanceName + "." + eventName + "() {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
             str += HtmlWrapper.addInnerSelectionClass(childBlock != null ? visitNode(childBlock, depth + 1) : HtmlWrapper.indent(depth + 1) + "/* when " + componentName + "." + eventName + " event handler */\n", blockId, selectedBlockId);
-            str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("}\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+            str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("}\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
           }
         }
         
@@ -599,12 +585,12 @@ public class CodePanel extends Composite {
                 
                 if(isSet) {
                   str += HtmlWrapper.indent(depth);
-                  str += HtmlWrapper.addCSSClass(instanceName + ".set" + propertyName + "(", SETTER_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  str += HtmlWrapper.addCSSClass(instanceName + ".set" + propertyName + "(", HtmlWrapper.SETTER_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                   str += childText;
-                  str += HtmlWrapper.addCSSClass(");\n", SETTER_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  str += HtmlWrapper.addCSSClass(");\n", HtmlWrapper.SETTER_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                   
                 } else {
-                  str += HtmlWrapper.addCSSClass(instanceName + ".get" + propertyName + "()", GETTER_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  str += HtmlWrapper.addCSSClass(instanceName + ".get" + propertyName + "()", HtmlWrapper.GETTER_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 }
                 
                 str += checkUncaughtChildren(n, new String[]{"mutation", "title", "value", "next", "#text"});
@@ -627,20 +613,20 @@ public class CodePanel extends Composite {
                     String iftext = HtmlWrapper.addInnerSelectionClass(getChildText(n, depth, "IF" + i, "/* NO CONDITION" + i + " */"), blockId, selectedBlockId);
                     String dotext = HtmlWrapper.addInnerSelectionClass(getChildText(n, depth + 1, "DO" + i, HtmlWrapper.indent(depth + 1) + "// nothing to do here!\n", "statement"), blockId, selectedBlockId);
                     
-                    str += HtmlWrapper.addCSSClass((i > 0 ? " else " : "") + "if(", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                    str += HtmlWrapper.addCSSClass((i > 0 ? " else " : "") + "if(", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                     str += iftext;
-                    str += HtmlWrapper.addCSSClass(") {\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                    str += HtmlWrapper.addCSSClass(") {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                     str += dotext;
-                    str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("}", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                    str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("}", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                   }
                   
                   // handle else block
                   if(elses == 1) {
                     String dotext = HtmlWrapper.addInnerSelectionClass(getChildText(n, depth + 1, "ELSE", HtmlWrapper.indent(depth + 1) + "// nothing to do here!\n", "statement"), blockId, selectedBlockId);
                     
-                    str += HtmlWrapper.addCSSClass(" else {\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                    str += HtmlWrapper.addCSSClass(" else {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                     str += dotext;
-                    str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("}\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                    str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("}\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                   } else {
                     str += "\n";
                   }
@@ -649,11 +635,11 @@ public class CodePanel extends Composite {
                   String iftext = HtmlWrapper.addInnerSelectionClass(getChildText(n, depth, "IF0", "/* NO CONDITION0 */"), blockId, selectedBlockId);
                   String dotext = HtmlWrapper.addInnerSelectionClass(getChildText(n, depth + 1, "DO0", HtmlWrapper.indent(depth + 1) + "// nothing to do here!\n", "statement"), blockId, selectedBlockId);
                   
-                  str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("if(", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("if(", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                   str += iftext;
-                  str += HtmlWrapper.addCSSClass(") {\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  str += HtmlWrapper.addCSSClass(") {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                   str += dotext;
-                  str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("}\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("}\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 }
                 
                 skipChildren = true;
@@ -674,29 +660,29 @@ public class CodePanel extends Composite {
                 //if(comment != null) str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("// " + comment, COMMENT_CSS_CLASS, blockId, selectedBlockId) + "\n";
                 str += createCommentString(comment, false, blockId, depth);
                 
-                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("for(int ", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("for(int ", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(forIndexName, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(" = ", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(" = ", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(forStart, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass("; ", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("; ", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 // ugly part
                 str += HtmlWrapper.addInnerSelectionClass(forStep, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(" > 0 ? ", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(" > 0 ? ", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(forIndexName, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(" <= ", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(" <= ", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(forEnd, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(" : ", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(" : ", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(forIndexName, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(" >= ", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(" >= ", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 // end ugly part
                 str += HtmlWrapper.addInnerSelectionClass(forEnd, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass("; ", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("; ", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(forIndexName, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(" += ", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(" += ", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(forStep, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(") {\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(") {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("}\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("}\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -708,13 +694,13 @@ public class CodePanel extends Composite {
 
                 // TODO: need to remember that this variable is of type Object somehow for casting
                 
-                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("for(Object ", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("for(Object ", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(forItem, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(" : ", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(" : ", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(forList, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(") {\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(") {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("}\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("}\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 break;
@@ -722,11 +708,11 @@ public class CodePanel extends Composite {
                 String whileCondition = getChildText(n, depth, "TEST");
                 childText = getChildText(n, depth + 1, "DO", HtmlWrapper.indent(depth + 1) + "// while loop body", "statement");
 
-                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("while(", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("while(", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(whileCondition, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(") {\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(") {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("}\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("}\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 break;
@@ -735,13 +721,13 @@ public class CodePanel extends Composite {
                 String chooseThen = getChildText(n, depth, "THENRETURN");
                 String chooseElse = getChildText(n, depth, "ELSERETURN");
                 
-                str += HtmlWrapper.addCSSClass("(", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("(", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(chooseTest, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(" ? ", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(" ? ", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(chooseThen, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(" : ", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(" : ", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(chooseElse, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 break;
@@ -751,7 +737,7 @@ public class CodePanel extends Composite {
                 String ctrlDoReturnValue = getChildText(n, depth, "VALUE");
                 
                 // TODO: if I go this route, just remove the block from Code Inventor
-                str += HtmlWrapper.addCSSClass("/* This block is not supported by Code Inventor */", COMMENT_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("/* This block is not supported by Code Inventor */", HtmlWrapper.COMMENT_CSS_CLASS, blockId, selectedBlockId);
                 
                 // TODO: implement this somehow if possible?
                 //   Options:
@@ -788,12 +774,12 @@ public class CodePanel extends Composite {
               case controls_openAnotherScreen:
                 childText = getChildText(n, depth, "SCREEN");
                 
-                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("startActivity(new Intent().setClassName(", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass("\"" + PACKAGE_NAME + "\"", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(", ", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass("\"" + PACKAGE_NAME + ".\" + ", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("startActivity(new Intent().setClassName(", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("\"" + PACKAGE_NAME + "\"", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(", ", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("\"" + PACKAGE_NAME + ".\" + ", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass("));\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("));\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 break;
@@ -803,17 +789,17 @@ public class CodePanel extends Composite {
                 
                 // TODO: add a field with type information for getData on the other side
                 
-                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("startActivity(new Intent().setClassName(", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass("\"" + PACKAGE_NAME + "\"", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(", ", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass("\"" + PACKAGE_NAME + ".\" + ", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("startActivity(new Intent().setClassName(", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("\"" + PACKAGE_NAME + "\"", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(", ", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("\"" + PACKAGE_NAME + ".\" + ", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(leftChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
-                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("                          .putExtra(", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass("\"" + OPEN_SCREEN_START_VALUE + "\"", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(", ", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("                          .putExtra(", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("\"" + OPEN_SCREEN_START_VALUE + "\"", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(", ", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(rightChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass("));\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("));\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 break;
@@ -830,28 +816,28 @@ public class CodePanel extends Composite {
                 
                 // this extracts the object out of the JSON-encoded string data passed to a new activity
                 
-                str += HtmlWrapper.addCSSClass("getIntent().getExtras().get(\"" + OPEN_SCREEN_START_VALUE + "\")", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("getIntent().getExtras().get(\"" + OPEN_SCREEN_START_VALUE + "\")", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 break;
               case controls_closeScreen:
-                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("finish();\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("finish();\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 break;
               case controls_closeScreenWithValue:
                 // TODO: Add a field to remember the type
                 childText = getChildText(n, depth, "SCREEN");
-                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("setResult(Activity.RESULT_OK, new Intent().putExtra(\"" + OPEN_SCREEN_START_VALUE + "\", ", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("setResult(Activity.RESULT_OK, new Intent().putExtra(\"" + OPEN_SCREEN_START_VALUE + "\", ", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass("));\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
-                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("finish();\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("));\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("finish();\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 break;
               case controls_closeApplication:
                 // TODO: need to propagate this back down to the main application screen then call exit
-                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("System.exit(0);\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("System.exit(0);\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 break;
@@ -873,18 +859,18 @@ public class CodePanel extends Composite {
               case logic_boolean:
                 // TODO: getTitleFromBlock
                 String logicBoolVal = getTitleFromBlock(n).toLowerCase();
-                str += HtmlWrapper.addCSSClass(logicBoolVal, LOGIC_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(logicBoolVal, HtmlWrapper.LOGIC_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 break;
               case logic_false:
                 String logicFalseVal = getTitleFromBlock(n).toLowerCase();
-                str += HtmlWrapper.addCSSClass(logicFalseVal, LOGIC_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(logicFalseVal, HtmlWrapper.LOGIC_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 break;
               case logic_negate:
                 childText = getChildText(n, depth, "BOOL", "/* value to be negated */");
                 
-                str += HtmlWrapper.addCSSClass("!", LOGIC_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("!", HtmlWrapper.LOGIC_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
                 
                 skipChildren = true;
@@ -895,11 +881,11 @@ public class CodePanel extends Composite {
                 rightChildText = getChildText(n, depth, "B", "/* right side of comparison */");
 
                 // TODO: check if enclosing parentheses are necessary before adding them
-                str += HtmlWrapper.addCSSClass("(", LOGIC_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("(", HtmlWrapper.LOGIC_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(leftChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(" " + blockToLogicOperator(n) + " ", LOGIC_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(" " + blockToLogicOperator(n) + " ", HtmlWrapper.LOGIC_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(rightChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")", LOGIC_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.LOGIC_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -910,11 +896,11 @@ public class CodePanel extends Composite {
                 rightChildText = getChildText(n, depth, "B", "/* right side of logic operation */");
 
                 // TODO: check if enclosing parentheses are necessary before adding them
-                str += HtmlWrapper.addCSSClass("(", LOGIC_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("(", HtmlWrapper.LOGIC_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(leftChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(" " + blockToLogicOperator(n), LOGIC_BLOCK_CSS_CLASS, blockId, selectedBlockId) + " ";
+                str += HtmlWrapper.addCSSClass(" " + blockToLogicOperator(n), HtmlWrapper.LOGIC_BLOCK_CSS_CLASS, blockId, selectedBlockId) + " ";
                 str += HtmlWrapper.addInnerSelectionClass(rightChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")", LOGIC_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.LOGIC_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -923,7 +909,7 @@ public class CodePanel extends Composite {
               /* Math blocks */
               case math_number:
                 String number = getTitleFromBlock(n);
-                str += HtmlWrapper.addCSSClass(number, MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(number, HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 //if(comment != null) str += " /* " + comment + " */";
                 str += createCommentString(comment, true, blockId, depth);
@@ -936,11 +922,11 @@ public class CodePanel extends Composite {
                 rightChildText = getChildText(n, depth, "B", "/* right side of comparison */");
 
                 // TODO: check if enclosing parentheses are necessary before adding them
-                str += HtmlWrapper.addCSSClass("(", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("(", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(leftChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(" " + blockToMathOperator(n) + " ", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(" " + blockToMathOperator(n) + " ", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(rightChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -949,15 +935,15 @@ public class CodePanel extends Composite {
                 int additions = Integer.parseInt(getChildOfType(n, "mutation", 0).getAttributes().getNamedItem("items").getNodeValue());
                 
                 // TODO: check if enclosing parentheses are necessary before adding them
-                str += HtmlWrapper.addCSSClass("(", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("(", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 for(int i = 0; i < additions; i++) {
-                  if(i > 0) str += HtmlWrapper.addCSSClass(" + ", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);                  
+                  if(i > 0) str += HtmlWrapper.addCSSClass(" + ", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);                  
                   childText = getChildText(n, depth, "NUM" + i, "/* value */");
                   str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId); 
                 }
 
-                str += HtmlWrapper.addCSSClass(")", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -967,11 +953,11 @@ public class CodePanel extends Composite {
                 rightChildText = getChildText(n, depth, "B", "/* value */");
 
                 // TODO: check if enclosing parentheses are necessary before adding them
-                str += HtmlWrapper.addCSSClass("(", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("(", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(leftChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(" - ", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(" - ", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(rightChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -980,15 +966,15 @@ public class CodePanel extends Composite {
                 int multiplications = Integer.parseInt(getChildOfType(n, "mutation", 0).getAttributes().getNamedItem("items").getNodeValue());
                 
                 // TODO: check if enclosing parentheses are necessary before adding them
-                str += HtmlWrapper.addCSSClass("(", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("(", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 for(int i = 0; i < multiplications; i++) {
-                  if(i > 0) str += HtmlWrapper.addCSSClass(" * ", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  if(i > 0) str += HtmlWrapper.addCSSClass(" * ", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                   childText = getChildText(n, depth, "NUM" + i, "/* value */");                  
                   str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId); 
                 }
 
-                str += HtmlWrapper.addCSSClass(")", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -998,11 +984,11 @@ public class CodePanel extends Composite {
                 rightChildText = getChildText(n, depth, "B", "/* value */");
 
                 // TODO: check if enclosing parentheses are necessary before adding them
-                str += HtmlWrapper.addCSSClass("(", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("(", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(leftChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(" / ", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(" / ", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(rightChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1012,11 +998,11 @@ public class CodePanel extends Composite {
                 rightChildText = getChildText(n, depth, "B", "/* value */");
                 
                 // TODO: Math.pow returns a double, may need to cast as an int
-                str += HtmlWrapper.addCSSClass("Math.pow(", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("Math.pow(", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(leftChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(", ", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(", ", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(rightChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1029,13 +1015,13 @@ public class CodePanel extends Composite {
                 addGlobal(RANDOM_GENERATOR_INIT_PREFIX + RANDOM_GENERATOR_NAME + RANDOM_GENERATOR_INIT_SUFFIX, blockId);
                 // TODO: get rid of _randomGenerator if the last block using it is deleted!
                 
-                str += HtmlWrapper.addCSSClass("(" + RANDOM_GENERATOR_NAME + ".nextInt(", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("(" + RANDOM_GENERATOR_NAME + ".nextInt(", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(randomMax, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(" - ", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(" - ", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(randomMin, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(") + ", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(") + ", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(randomMin, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1044,7 +1030,7 @@ public class CodePanel extends Composite {
                 addImport(RANDOM_IMPORT_PATH, blockId);
                 addGlobal(RANDOM_GENERATOR_INIT_PREFIX + RANDOM_GENERATOR_NAME + RANDOM_GENERATOR_INIT_SUFFIX, blockId);
                 
-                str+= HtmlWrapper.addCSSClass(RANDOM_GENERATOR_NAME + ".nextDouble()", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str+= HtmlWrapper.addCSSClass(RANDOM_GENERATOR_NAME + ".nextDouble()", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
 
                 break;
               case math_random_set_seed:
@@ -1053,9 +1039,9 @@ public class CodePanel extends Composite {
                 
                 childText = getChildText(n, depth, "NUM", "/* seed value */");
                 
-                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass(RANDOM_GENERATOR_NAME + ".setSeed(", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass(RANDOM_GENERATOR_NAME + ".setSeed(", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")\n", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")\n", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1071,12 +1057,12 @@ public class CodePanel extends Composite {
                     childText = getChildText(n, depth, "NUM" + i, "/* value */");
                     
                     if(i != itemsInList - 1) {
-                      str += HtmlWrapper.addCSSClass("Math." + operation + "(", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                      str += HtmlWrapper.addCSSClass("Math." + operation + "(", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                       str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                      str += HtmlWrapper.addCSSClass(", ", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                      str += HtmlWrapper.addCSSClass(", ", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                     } else {
                       str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                      str += HtmlWrapper.addCSSClass(HtmlWrapper.multiplyChars(')', itemsInList - 1), MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                      str += HtmlWrapper.addCSSClass(HtmlWrapper.multiplyChars(')', itemsInList - 1), HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                     }
                   }
                 } else if(itemsInList == 0) {
@@ -1100,9 +1086,9 @@ public class CodePanel extends Composite {
                 String pretext = operationToMathPretext(blockToMathSingleType(n));
                 childText = getChildText(n, depth, "NUM", "/* value */");
 
-                str += HtmlWrapper.addCSSClass(pretext, MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(pretext, HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1113,25 +1099,25 @@ public class CodePanel extends Composite {
                 rightChildText = getChildText(n, depth, "DIVISOR");
                 
                 if(operation.compareTo("MODULO") == 0 || operation.compareTo("REMAINDER") == 0) {
-                  str += HtmlWrapper.addCSSClass("(", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  str += HtmlWrapper.addCSSClass("(", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                   str += HtmlWrapper.addInnerSelectionClass(leftChildText, blockId, selectedBlockId);
-                  str += HtmlWrapper.addCSSClass(" % ", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  str += HtmlWrapper.addCSSClass(" % ", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                   str += HtmlWrapper.addInnerSelectionClass(rightChildText, blockId, selectedBlockId);
-                  str += HtmlWrapper.addCSSClass(")", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  str += HtmlWrapper.addCSSClass(")", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 } else if(operation.compareTo("QUOTIENT") == 0) {
                   // TODO: add comment describing why this is a complicated formula
 
                   String divideText = HtmlWrapper.addInnerSelectionClass(leftChildText, blockId, selectedBlockId); 
-                  divideText += HtmlWrapper.addCSSClass(" / ", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  divideText += HtmlWrapper.addCSSClass(" / ", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                   divideText += HtmlWrapper.addInnerSelectionClass(rightChildText, blockId, selectedBlockId); 
 
-                  str += HtmlWrapper.addCSSClass("(((Object) (", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  str += HtmlWrapper.addCSSClass("(((Object) (", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                   str += divideText;
-                  str += HtmlWrapper.addCSSClass(")).getClass().equals(Integer.class) ? ", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  str += HtmlWrapper.addCSSClass(")).getClass().equals(Integer.class) ? ", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                   str += divideText;
-                  str += HtmlWrapper.addCSSClass(" : Math.floor(", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  str += HtmlWrapper.addCSSClass(" : Math.floor(", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                   str += divideText;
-                  str += HtmlWrapper.addCSSClass("))", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  str += HtmlWrapper.addCSSClass("))", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 } else {
                   OdeLog.wlog("UNKNOWN MATH_DIVIDE TYPE: " + operation);
                 }
@@ -1145,9 +1131,9 @@ public class CodePanel extends Composite {
                 operation = getTitleFromBlock(n);
                 childText = getChildText(n, depth, "NUM");
                 
-                str += HtmlWrapper.addCSSClass("Math." + operation.toLowerCase() + "(", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("Math." + operation.toLowerCase() + "(", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1156,11 +1142,11 @@ public class CodePanel extends Composite {
                 leftChildText = getChildText(n, depth, "Y");
                 rightChildText = getChildText(n, depth, "X");
                 
-                str += HtmlWrapper.addCSSClass("Math.atan2(", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("Math.atan2(", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(leftChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(", ", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(", ", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(rightChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1177,9 +1163,9 @@ public class CodePanel extends Composite {
                   OdeLog.wlog("UNKNOWN MATH_CONVERT_ANGLES CONVERSION: " + operation);
                 }
                 
-                str += HtmlWrapper.addCSSClass("Math." + operation + "(", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("Math." + operation + "(", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1192,11 +1178,11 @@ public class CodePanel extends Composite {
                 
                 addImport(BIG_DECIMAL_IMPORT_PATH, blockId);
                 
-                str += HtmlWrapper.addCSSClass("BigDecimal.valueOf(", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("BigDecimal.valueOf(", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(decimalToRound, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(").setScale(", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(").setScale(", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(numberOfPlaces, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(", BigDecimal.ROUND_HALF_UP).doubleValue()", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(", BigDecimal.ROUND_HALF_UP).doubleValue()", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1207,25 +1193,25 @@ public class CodePanel extends Composite {
 
                 // TODO: add a note about why this is convoluted
                 
-                str += HtmlWrapper.addCSSClass("(", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("(", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
-                str += HtmlWrapper.addCSSClass("((Object) ", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("((Object) ", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += innerStr;
-                str += HtmlWrapper.addCSSClass(").getClass().equals(Integer.class)", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(").getClass().equals(Integer.class)", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
-                str += HtmlWrapper.addCSSClass(" || ", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(" || ", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
-                str += HtmlWrapper.addCSSClass("((Object) ", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("((Object) ", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += innerStr;
-                str += HtmlWrapper.addCSSClass(").getClass().equals(Float.class)", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(").getClass().equals(Float.class)", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
-                str += HtmlWrapper.addCSSClass(" || ", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(" || ", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
-                str += HtmlWrapper.addCSSClass("((Object) ", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("((Object) ", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += innerStr;
-                str += HtmlWrapper.addCSSClass(").getClass().equals(Double.class)", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(").getClass().equals(Double.class)", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
-                str += HtmlWrapper.addCSSClass(")", MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.MATH_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1240,7 +1226,7 @@ public class CodePanel extends Composite {
                 String textStr = getTitleFromBlock(n);
                 if(textStr == null) textStr = "";
                 
-                str += HtmlWrapper.addCSSClass("\"" + textStr + "\"", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("\"" + textStr + "\"", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1250,18 +1236,18 @@ public class CodePanel extends Composite {
                 int numTexts = Integer.parseInt(getAttributeValueIfExists(mutation, "items", "0"));
                 
                 // TODO: check parens
-                if(numTexts >= 1) str += HtmlWrapper.addCSSClass("(", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                if(numTexts >= 1) str += HtmlWrapper.addCSSClass("(", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 // TODO: only add opening quotes if the first item in the list isn't a string
-                if(numTexts >= 1) str += HtmlWrapper.addCSSClass("\"\" + ", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                if(numTexts >= 1) str += HtmlWrapper.addCSSClass("\"\" + ", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 for(int i = 0; i < numTexts; ++i) {
                   childText = getChildText(n, depth, "ADD" + i);
-                  if(i != 0) str += HtmlWrapper.addCSSClass(" + ", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  if(i != 0) str += HtmlWrapper.addCSSClass(" + ", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                   str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
                 }
 
-                if(numTexts >= 1) str += HtmlWrapper.addCSSClass(")", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                if(numTexts >= 1) str += HtmlWrapper.addCSSClass(")", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1270,7 +1256,7 @@ public class CodePanel extends Composite {
                 childText = getChildText(n, depth, "VALUE");
                 
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(".length()", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(".length()", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1279,7 +1265,7 @@ public class CodePanel extends Composite {
                 childText = getChildText(n, depth, "VALUE");
                 
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(".isEmpty()", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(".isEmpty()", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1290,11 +1276,11 @@ public class CodePanel extends Composite {
                 operation = xmlTextOperationToJava(getTitleFromBlock(n));
 
                 // TODO: check if parens are necessary
-                str += HtmlWrapper.addCSSClass("(", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("(", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(leftChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(".compareTo(", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(".compareTo(", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(rightChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(") " + operation + " 0)", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(") " + operation + " 0)", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                                 
                 skipChildren = true;
                 
@@ -1303,7 +1289,7 @@ public class CodePanel extends Composite {
                 childText = getChildText(n, depth, "TEXT");
                 
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(".trim()", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(".trim()", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1313,7 +1299,7 @@ public class CodePanel extends Composite {
                 operation = mapXmlTextCaseChangeToJava(getTitleFromBlock(n));
                 
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(operation, TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(operation, HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1323,9 +1309,9 @@ public class CodePanel extends Composite {
                 rightChildText = getChildText(n, depth, "PIECE");
                 
                 str += HtmlWrapper.addInnerSelectionClass(leftChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(".indexOf(", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(".indexOf(", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(rightChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                     
                 skipChildren = true;
                 
@@ -1335,9 +1321,9 @@ public class CodePanel extends Composite {
                 rightChildText = getChildText(n, depth, "PIECE");
                 
                 str += HtmlWrapper.addInnerSelectionClass(leftChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(".contains(", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(".contains(", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(rightChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                     
                 skipChildren = true;
                 break;
@@ -1352,38 +1338,38 @@ public class CodePanel extends Composite {
                 addImport(ARRAYS_IMPORT_PATH, blockId);
                 addImport(PATTERN_IMPORT_PATH, blockId);
                 
-                str += HtmlWrapper.addCSSClass("Arrays.asList((\"\" + ", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("Arrays.asList((\"\" + ", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 if(operation.compareTo("SPLITATFIRST") == 0) {
                   // TODO: add help text describing why we add Pattern.quote() in all of these instances
                   str += HtmlWrapper.addInnerSelectionClass(leftChildText, blockId, selectedBlockId);
-                  str += HtmlWrapper.addCSSClass(").split(Pattern.quote(\"\" + ", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  str += HtmlWrapper.addCSSClass(").split(Pattern.quote(\"\" + ", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                   str += HtmlWrapper.addInnerSelectionClass(rightChildText, blockId, selectedBlockId);
-                  str += HtmlWrapper.addCSSClass("), 2)", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  str += HtmlWrapper.addCSSClass("), 2)", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 } else if(operation.compareTo("SPLITATFIRSTOFANY") == 0) {
                   str += HtmlWrapper.addInnerSelectionClass(leftChildText, blockId, selectedBlockId);
-                  str += HtmlWrapper.addCSSClass(".split(", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  str += HtmlWrapper.addCSSClass(".split(", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                   // combine these into a single regex?
                   // TODO: need to make a getListAsStringArray method or something like that and Pattern each one
                   str += HtmlWrapper.addInnerSelectionClass(rightChildText, blockId, selectedBlockId);
-                  str += HtmlWrapper.addCSSClass(", 2)", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  str += HtmlWrapper.addCSSClass(", 2)", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 } else if(operation.compareTo("SPLIT") == 0) {
                   str += HtmlWrapper.addInnerSelectionClass(leftChildText, blockId, selectedBlockId);
-                  str += HtmlWrapper.addCSSClass(").split(Pattern.quote(\"\" + ", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  str += HtmlWrapper.addCSSClass(").split(Pattern.quote(\"\" + ", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                   str += HtmlWrapper.addInnerSelectionClass(rightChildText, blockId, selectedBlockId);
-                  str += HtmlWrapper.addCSSClass(")", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  str += HtmlWrapper.addCSSClass(")", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 } else if(operation.compareTo("SPLITATANY") == 0) {
                   str += HtmlWrapper.addInnerSelectionClass(leftChildText, blockId, selectedBlockId);
-                  str += HtmlWrapper.addCSSClass(".split(", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  str += HtmlWrapper.addCSSClass(".split(", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                   // combine these into a single regex?
                   // TODO: need to make a getListAsStringArray method or something like that and Pattern each one
                   str += HtmlWrapper.addInnerSelectionClass(rightChildText, blockId, selectedBlockId);
-                  str += HtmlWrapper.addCSSClass(")", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  str += HtmlWrapper.addCSSClass(")", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 } else {
                   OdeLog.wlog("UNKNOWN TEXT_SPLIT TYPE " + operation);
                 }
 
-                str += HtmlWrapper.addCSSClass(")", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 //str += "" + Arrays.asList("hi", "blah");
                 //str += "" + Arrays.asList("what's up?".split("up"));
@@ -1407,9 +1393,9 @@ public class CodePanel extends Composite {
                 
                 // TODO: add notes about why we use "" + and Arrays.asList
                 
-                str += HtmlWrapper.addCSSClass("new ArrayList(Arrays.asList((\"\" + ", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("new ArrayList(Arrays.asList((\"\" + ", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(").split([ \\t\\n\\r\\f])))", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(").split([ \\t\\n\\r\\f])))", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1422,15 +1408,15 @@ public class CodePanel extends Composite {
                 // TODO: add note about why there's a -1 for start and length
                 //        and .substring using start + end instead of start + length
                 
-                str += HtmlWrapper.addCSSClass("(\"\" + ", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("(\"\" + ", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(").substring(", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(").substring(", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(textStartStr, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(" - 1, ", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(" - 1, ", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(textStartStr, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(" - 1 + ", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(" - 1 + ", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(textLengthStr, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1443,13 +1429,13 @@ public class CodePanel extends Composite {
                 // TODO: add note about why "" + is needed for each string here
                 // TODO: change "" + behavior based on type of inner block?
 
-                str += HtmlWrapper.addCSSClass("(\"\" + ", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("(\"\" + ", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(").replaceAll(Pattern.quote(\"\" + ", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(").replaceAll(Pattern.quote(\"\" + ", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(textSegmentStr, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass("), \"\" + ", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("), \"\" + ", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(textReplacementStr, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")", TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.TEXT_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1467,22 +1453,22 @@ public class CodePanel extends Composite {
               case color_light_gray:
               case color_gray:
               case color_dark_gray:
-                str += HtmlWrapper.addCSSClass(HtmlWrapper.makeColorSpan(getTitleFromBlock(n).replaceAll("#", "0x"), getTitleFromBlock(n)), COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(HtmlWrapper.makeColorSpan(getTitleFromBlock(n).replaceAll("#", "0x"), getTitleFromBlock(n)), HtmlWrapper.COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 break;
               case color_make_color:
                 childText = getChildText(n, depth, "COLORLIST");
                 
-                str += HtmlWrapper.addCSSClass("((", COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("((", HtmlWrapper.COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(".size() == 4 ? (Integer) ", COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(".size() == 4 ? (Integer) ", HtmlWrapper.COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(".get(3) << 24 : 0) | ((Integer) ", COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(".get(3) << 24 : 0) | ((Integer) ", HtmlWrapper.COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(".get(0) << 16) | ((Integer) ", COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(".get(0) << 16) | ((Integer) ", HtmlWrapper.COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(".get(1) << 8) | ((Integer) ", COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(".get(1) << 8) | ((Integer) ", HtmlWrapper.COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(".get(2)))", COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(".get(2)))", HtmlWrapper.COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1494,15 +1480,15 @@ public class CodePanel extends Composite {
                 addImport(ARRAYS_IMPORT_PATH, blockId);
                 addImport(ANDROID_COLOR_IMPORT_PATH, blockId);
                 
-                str += HtmlWrapper.addCSSClass("new ArrayList(Arrays.asList(Color.red(", COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("new ArrayList(Arrays.asList(Color.red(", HtmlWrapper.COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass("), Color.green(", COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("), Color.green(", HtmlWrapper.COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass("), Color.blue(", COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("), Color.blue(", HtmlWrapper.COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass("), Color.alpha(", COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("), Color.alpha(", HtmlWrapper.COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")))", COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")))", HtmlWrapper.COLORS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1510,24 +1496,24 @@ public class CodePanel extends Composite {
               case lists_create_with:
                 mutation = getChildOfType(n, "mutation", 0);
                 
-                str += HtmlWrapper.addCSSClass("new ArrayList(", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("new ArrayList(", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 if(mutation != null) {
                   int listItems = Integer.parseInt(getAttributeValueIfExists(mutation, "items", "0"));
                   
-                  if(listItems > 0) str += HtmlWrapper.addCSSClass("Arrays.asList(", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  if(listItems > 0) str += HtmlWrapper.addCSSClass("Arrays.asList(", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                   
                   for(int i = 0; i < listItems; ++i) {
                     childText = getChildText(n, depth, "ADD" + i);
                     
-                    if(i != 0) str += HtmlWrapper.addCSSClass(", ", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                    if(i != 0) str += HtmlWrapper.addCSSClass(", ", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                     str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
                   }
                   
-                  if(listItems > 0) str += HtmlWrapper.addCSSClass(")", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                  if(listItems > 0) str += HtmlWrapper.addCSSClass(")", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 }
                                 
-                str += HtmlWrapper.addCSSClass(")", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1545,9 +1531,9 @@ public class CodePanel extends Composite {
                     String listAddText = getChildText(n, depth, "ITEM" + i);
                     
                     str += HtmlWrapper.indent(depth) + HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                    str += HtmlWrapper.addCSSClass(".add(", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                    str += HtmlWrapper.addCSSClass(".add(", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                     str += HtmlWrapper.addInnerSelectionClass(listAddText, blockId, selectedBlockId);
-                    str += HtmlWrapper.addCSSClass(");\n", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                    str += HtmlWrapper.addCSSClass(");\n", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                   }
                 }
                 
@@ -1559,9 +1545,9 @@ public class CodePanel extends Composite {
                 rightChildText = getChildText(n, depth, "LIST");
                 
                 str += HtmlWrapper.addInnerSelectionClass(rightChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(".contains(", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(".contains(", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(leftChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1570,7 +1556,7 @@ public class CodePanel extends Composite {
                 childText = getChildText(n, depth, "LIST");
                 
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(".size()", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(".size()", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1579,7 +1565,7 @@ public class CodePanel extends Composite {
                 childText = getChildText(n, depth, "LIST");
                 
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(".isEmpty()", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(".isEmpty()", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1591,9 +1577,9 @@ public class CodePanel extends Composite {
                 addGlobal(RANDOM_GENERATOR_INIT_PREFIX + RANDOM_GENERATOR_NAME + RANDOM_GENERATOR_INIT_SUFFIX, blockId);
                 
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(".get(" + RANDOM_GENERATOR_NAME + ".nextInt(", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(".get(" + RANDOM_GENERATOR_NAME + ".nextInt(", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(".size()))", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(".size()))", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1603,9 +1589,9 @@ public class CodePanel extends Composite {
                 rightChildText = getChildText(n, depth, "LIST");
                 
                 str += HtmlWrapper.addInnerSelectionClass(rightChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(".indexOf(", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(".indexOf(", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(leftChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1617,9 +1603,9 @@ public class CodePanel extends Composite {
                 // TODO: add note about why -1 is here, highlight text in some way
                 
                 str += HtmlWrapper.addInnerSelectionClass(leftChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(".get(", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(".get(", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(rightChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(" - 1)", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(" - 1)", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1630,11 +1616,11 @@ public class CodePanel extends Composite {
                 String listInsertItemText = getChildText(n, depth, "ITEM");
                 
                 str += HtmlWrapper.indent(depth) + HtmlWrapper.addInnerSelectionClass(listInsertListText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(".add(", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(".add(", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(listInsertIndexText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(", ", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(", ", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(listInsertItemText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(");\n", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(");\n", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
 
                 skipChildren = true;
                 
@@ -1645,11 +1631,11 @@ public class CodePanel extends Composite {
                 String listReplaceItemReplacementText = getChildText(n, depth, "ITEM");
 
                 str += HtmlWrapper.indent(depth) + HtmlWrapper.addInnerSelectionClass(listReplaceItemListText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(".set(", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(".set(", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(listReplaceItemIndexText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(", ", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(", ", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(listReplaceItemReplacementText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(");\n", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(");\n", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1659,9 +1645,9 @@ public class CodePanel extends Composite {
                 rightChildText = getChildText(n, depth, "INDEX");
                 
                 str += HtmlWrapper.indent(depth) + HtmlWrapper.addInnerSelectionClass(leftChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(".remove(", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(".remove(", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(rightChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(");\n", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(");\n", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1671,9 +1657,9 @@ public class CodePanel extends Composite {
                 rightChildText = getChildText(n, depth, "LIST1");
                 
                 str += HtmlWrapper.indent(depth) + HtmlWrapper.addInnerSelectionClass(leftChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(".addAll(", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(".addAll(", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(rightChildText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(");\n", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(");\n", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1681,9 +1667,9 @@ public class CodePanel extends Composite {
               case lists_copy:
                 childText = getChildText(n, depth, "LIST");
                 
-                str += HtmlWrapper.addCSSClass("new ArrayList(", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("new ArrayList(", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1691,10 +1677,10 @@ public class CodePanel extends Composite {
               case lists_is_list:
                 childText = getChildText(n, depth, "ITEM");
 
-                str += HtmlWrapper.addCSSClass("(", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("(", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 // TODO: if argument is a primitive (number, boolean), cast as Object
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(" instanceof ArrayList)", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(" instanceof ArrayList)", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1726,9 +1712,9 @@ public class CodePanel extends Composite {
                 
                 addFunction(listToCSVRowFunc, blockId);
                 
-                str += HtmlWrapper.addCSSClass("_listToCSVRow(", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("_listToCSVRow(", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1760,9 +1746,9 @@ public class CodePanel extends Composite {
                 
                 addFunction(listToCSVTableFunc, blockId);
                 
-                str += HtmlWrapper.addCSSClass("_listToCSVTable(", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("_listToCSVTable(", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 skipChildren = true;
                 
@@ -1800,9 +1786,9 @@ public class CodePanel extends Composite {
                 
                 addFunction(listFromCSVRow, blockId);
                 
-                str += HtmlWrapper.addCSSClass("_listFromCSVRow(", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass("_listFromCSVRow(", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 str += HtmlWrapper.addInnerSelectionClass(childText, blockId, selectedBlockId);
-                str += HtmlWrapper.addCSSClass(")", LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+                str += HtmlWrapper.addCSSClass(")", HtmlWrapper.LISTS_BLOCK_CSS_CLASS, blockId, selectedBlockId);
                 
                 // add them all as strings?
                 
@@ -1975,9 +1961,9 @@ public class CodePanel extends Composite {
     if(comment == null) return "";
     
     if(isInline) {
-      return HtmlWrapper.addCSSClass(" /* " + comment + " */ ", COMMENT_CSS_CLASS, blockId, selectedBlockId); 
+      return HtmlWrapper.addCSSClass(" /* " + comment + " */ ", HtmlWrapper.COMMENT_CSS_CLASS, blockId, selectedBlockId); 
     } else {
-      return HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("// " + comment, COMMENT_CSS_CLASS, blockId, selectedBlockId) + "\n"; 
+      return HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("// " + comment, HtmlWrapper.COMMENT_CSS_CLASS, blockId, selectedBlockId) + "\n"; 
     }
   }
   
@@ -2075,7 +2061,7 @@ public class CodePanel extends Composite {
     
     for(String str : imports.keySet()) {
       Set<Integer> s = imports.get(str);
-      String thisImport = HtmlWrapper.addCSSClass("import", SYSTEM_CSS_CLASS) + " " + str + ";\n";
+      String thisImport = HtmlWrapper.addCSSClass("import", HtmlWrapper.SYSTEM_CSS_CLASS) + " " + str + ";\n";
       
       for(Integer i : s) {
         thisImport = HtmlWrapper.addSelectionClass(thisImport, i, selectedBlockId);
@@ -2186,8 +2172,14 @@ public class CodePanel extends Composite {
   private String getEventHandlerSignature(String componentName, String componentType, String event, int blockId, int depth) {
     //TODO: import View
     String sig = "";
-    sig += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass(componentName + ".setOn" + ButtonComponent.eventNameMap(event) + "Listener(new View.On" + ButtonComponent.eventNameMap(event) + "Listener() {\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
-    sig += HtmlWrapper.indent(depth + 1) + HtmlWrapper.addCSSClass("public void on" + ButtonComponent.eventNameMap(event) + "(" + ButtonComponent.eventParameterMap(event) + ") {\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId); 
+    
+    if(componentType.equals("Button")) {
+      sig += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass(componentName + ".setOn" + ButtonComponent.eventNameMap(event) + "Listener(new View.On" + ButtonComponent.eventNameMap(event) + "Listener() {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+      sig += HtmlWrapper.indent(depth + 1) + HtmlWrapper.addCSSClass("public void on" + ButtonComponent.eventNameMap(event) + "(" + ButtonComponent.eventParameterMap(event) + ") {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId); 
+    } else {
+      
+    }
+    
     return sig;
   }
   

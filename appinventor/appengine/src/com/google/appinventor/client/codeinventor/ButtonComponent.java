@@ -46,21 +46,21 @@ public class ButtonComponent {
     return eventParamsMap.get(aiEventName);
   }
   
-//  public static String getEventHandlerSignature(String componentName, String event, int blockId, int selectedBlockId, int depth) {
-//    String sig = "";
-//    sig += indent(depth) + HtmlWrapper.addCSSClass(componentName + ".setOn" + ButtonComponent.eventNameMap(event) + "Listener(new View.On" + ButtonComponent.eventNameMap(event) + "Listener() {\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
-//    sig += indent(depth + 1) + HtmlWrapper.addCSSClass("public void on" + ButtonComponent.eventNameMap(event) + "(" + ButtonComponent.eventParameterMap(event) + ") {\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId); 
-//    
-//    if(event.equals("Click") || event.equals("LongClick")) {
-//      sig += indent(depth) + HtmlWrapper.addCSSClass(componentName + ".setOn" + event + "Listener(new View.On" + event + "Listener() {\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
-//      sig += indent(depth + 1) + HtmlWrapper.addCSSClass("public void on" + event + "(" + ButtonComponent.eventParameterMap(event) + ") {\n", CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId); 
-//      
-//    } else if(event.equals("GotFocus")) {
-//      
-//    } else if(event.equals("LostFocus")) {
-//      
-//    }
-//    
-//    return sig;
-//  }
+  public static String getEventHandlerSignature(String componentName, String event, int blockId, int selectedBlockId, int depth) {
+    String sig = "";
+    sig += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass(componentName + ".setOn" + ButtonComponent.eventNameMap(event) + "Listener(new View.On" + ButtonComponent.eventNameMap(event) + "Listener() {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+    sig += HtmlWrapper.indent(depth + 1) + HtmlWrapper.addCSSClass("public void on" + ButtonComponent.eventNameMap(event) + "(" + ButtonComponent.eventParameterMap(event) + ") {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId); 
+    
+    if(event.equals("Click") || event.equals("LongClick")) {
+      sig += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass(componentName + ".setOn" + event + "Listener(new View.On" + event + "Listener() {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+      sig += HtmlWrapper.indent(depth + 1) + HtmlWrapper.addCSSClass("public void on" + event + "(" + ButtonComponent.eventParameterMap(event) + ") {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId); 
+      
+    } else if(event.equals("GotFocus")) {
+      
+    } else if(event.equals("LostFocus")) {
+      
+    }
+    
+    return sig;
+  }
 }

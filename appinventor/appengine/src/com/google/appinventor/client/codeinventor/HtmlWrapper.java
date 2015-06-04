@@ -6,6 +6,20 @@ public class HtmlWrapper {
   private static final String SELECTED_BLOCK_CSS_CLASS = "selectedblock";
   private static final String SELECTED_INNER_BLOCK_CSS_CLASS = "selectedinnerblock";
   
+  public static final String CONTROL_BLOCK_CSS_CLASS = "controlblock";
+  public static final String LOGIC_BLOCK_CSS_CLASS = "logicblock";
+  public static final String MATH_BLOCK_CSS_CLASS = "mathblock";
+  public static final String TEXT_BLOCK_CSS_CLASS = "textblock";
+  public static final String LISTS_BLOCK_CSS_CLASS = "listsblock";
+  public static final String COLORS_BLOCK_CSS_CLASS = "colorsblock";
+  public static final String VARIABLES_BLOCK_CSS_CLASS = "variablesblock";
+  public static final String PROCEDURES_BLOCK_CSS_CLASS = "proceduresblock";
+  public static final String GETTER_BLOCK_CSS_CLASS = "getterblock";
+  public static final String SETTER_BLOCK_CSS_CLASS = "setterblock";
+  public static final String ARGUMENTS_BLOCK_CSS_CLASS = "argumentsblock";
+  public static final String COMMENT_CSS_CLASS = "commentsection";
+  public static final String SYSTEM_CSS_CLASS = "systemblock";
+  
   public HtmlWrapper() {
   }
 
