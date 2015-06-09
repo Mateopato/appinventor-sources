@@ -159,9 +159,6 @@ public class CodePanel extends Composite {
   
   private static final String PACKAGE_NAME = "codeinventor.generated";
   
-  public static final String SELECTED_BLOCK_CSS_CLASS = "selectedblock";
-  public static final String SELECTED_INNER_BLOCK_CSS_CLASS = "selectedinnerblock";
-  
   private static final String IMPORT_DELIMITER = "--IMPORTS--";
   private static final String GLOBALS_DELIMITER = "--GLOBALS--";
   private static final String FUNCTIONS_DELIMITER = "--FUNCTIONS--";
@@ -419,6 +416,7 @@ public class CodePanel extends Composite {
     
     for(String componentName : componentEvents.keySet()) {
       boolean focusDone = false;
+      boolean touchDone = false;
       str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("/**\n" + HtmlWrapper.indent(depth) + " * " + componentName + " event handlers\n" + HtmlWrapper.indent(depth) + " */\n", HtmlWrapper.COMMENT_CSS_CLASS);
       
       for(String eventName : componentEvents.get(componentName).keySet()) {
@@ -451,8 +449,8 @@ public class CodePanel extends Composite {
             
             // TODO: obfuscate the variables so they don't conflict with a user variable?
             // TODO: keep track of variables I've used to ensure no conflicts? -- v and hasFocus here
-            String hasFocusVar = "hasFocus";
             String viewVar = "componentView";
+            String hasFocusVar = "hasFocus";
             str += HtmlWrapper.indent(depth) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass(componentName + ".setOnFocusChangeListener(new View.OnFocusChangeListener() {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
             str += HtmlWrapper.indent(depth + 1) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("public void onFocusChange(View " + viewVar + ", boolean " + hasFocusVar + ") {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
             str += HtmlWrapper.indent(depth + 2) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("if(" + hasFocusVar + ") {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, lostFocusId, selectedBlockId), gotFocusId, selectedBlockId);
@@ -465,13 +463,40 @@ public class CodePanel extends Composite {
             
             focusDone = true;
           }
+        } else if((eventName.equals("TouchDown") || eventName.equals("TouchUp)"))) {
+          if(!touchDone) {
+            // TODO: test this code after merging App Inventor!
+            
+            // TODO: add MotionEvent import!
+            
+            Node touchDownChild = getChildOfType(getChildWithAttrValue(componentEvents.get(componentName).get("TouchDown"), "statement", "name", "DO"), "block", 0);
+            Node touchUpChild = getChildOfType(getChildWithAttrValue(componentEvents.get(componentName).get("TouchUp"), "statement", "name", "DO"), "block", 0);
+            
+            int touchDownId = Integer.parseInt(getAttributeValueIfExists(componentEvents.get(componentName).get("TouchDown"), "id", "-2"));
+            int touchUpId = Integer.parseInt(getAttributeValueIfExists(componentEvents.get(componentName).get("TouchUp"), "id", "-2"));
+            
+            String viewVar = "componentView";
+            String eventVar = "motionEvent";
+            
+            str += HtmlWrapper.indent(depth) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass(componentName + ".setOnTouchListener(new View.OnTouchListener() {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, touchDownId, selectedBlockId), touchUpId, selectedBlockId);
+//            @Override
+            str += HtmlWrapper.indent(depth + 1) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("public boolean onTouch(View " + viewVar + ", MotionEvent " + eventVar + ") {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, touchDownId, selectedBlockId), touchUpId, selectedBlockId);
+            str += HtmlWrapper.indent(depth + 2) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("if(" + eventVar + ".getAction() == MotionEvent.ACTION_DOWN) {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, touchDownId, selectedBlockId), touchUpId, selectedBlockId);
+            str += HtmlWrapper.addInnerSelectionClass(touchDownChild != null ? visitNode(touchDownChild, depth + 3) : HtmlWrapper.indent(depth + 3) + "/* when " + componentName + ".TouchDown event handler */\n", touchDownId, selectedBlockId);
+            str += HtmlWrapper.indent(depth + 2) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("} else if(" + eventVar + ".getAction() == MotionEvent.ACTION_UP) {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, touchDownId, selectedBlockId), touchUpId, selectedBlockId);
+            str += HtmlWrapper.addInnerSelectionClass(touchUpChild != null ? visitNode(touchUpChild, depth + 3) : HtmlWrapper.indent(depth + 3) + "/* when " + componentName + ".TouchUp event handler */\n", touchUpId, selectedBlockId);
+            str += HtmlWrapper.indent(depth + 2) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("}\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, touchDownId, selectedBlockId), touchUpId, selectedBlockId);
+            str += "\n";
+            str += HtmlWrapper.indent(depth + 2) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("return false;\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, touchDownId, selectedBlockId), touchUpId, selectedBlockId);
+            str += HtmlWrapper.indent(depth + 1) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("}\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, touchDownId, selectedBlockId), touchUpId, selectedBlockId);
+            str += HtmlWrapper.indent(depth) + HtmlWrapper.addSelectionClass(HtmlWrapper.addCSSClass("});\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, touchDownId, selectedBlockId), touchUpId, selectedBlockId);
+          }
         } else {
           // TODO: more to do here depending on the type of event
           if(componentType.equals("Button")) {
             str += getEventHandlerSignature(instanceName, componentType, eventName, blockId, depth);
             str += HtmlWrapper.addInnerSelectionClass(childBlock != null ? visitNode(childBlock, depth + 2) : HtmlWrapper.indent(depth + 2) + "/* when " + componentName + "." + eventName + " event handler */\n", blockId, selectedBlockId);
-            str += HtmlWrapper.indent(depth + 1) + HtmlWrapper.addCSSClass("}\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
-            str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("});\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
+            str += getEventHandlerClose(instanceName, componentType, eventName, blockId, depth);
           } else {
             str += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass("when " + instanceName + "." + eventName + "() {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
             str += HtmlWrapper.addInnerSelectionClass(childBlock != null ? visitNode(childBlock, depth + 1) : HtmlWrapper.indent(depth + 1) + "/* when " + componentName + "." + eventName + " event handler */\n", blockId, selectedBlockId);
@@ -2171,16 +2196,27 @@ public class CodePanel extends Composite {
   
   private String getEventHandlerSignature(String componentName, String componentType, String event, int blockId, int depth) {
     //TODO: import View
-    String sig = "";
+    String str = "";
     
     if(componentType.equals("Button")) {
-      sig += HtmlWrapper.indent(depth) + HtmlWrapper.addCSSClass(componentName + ".setOn" + ButtonComponent.eventNameMap(event) + "Listener(new View.On" + ButtonComponent.eventNameMap(event) + "Listener() {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
-      sig += HtmlWrapper.indent(depth + 1) + HtmlWrapper.addCSSClass("public void on" + ButtonComponent.eventNameMap(event) + "(" + ButtonComponent.eventParameterMap(event) + ") {\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId); 
+      str += ButtonComponent.getEventHandlerSignature(componentName, event, blockId, selectedBlockId, depth);
     } else {
       
     }
     
-    return sig;
+    return str;
+  }
+  
+  private String getEventHandlerClose(String componentName, String componentType, String event, int blockId, int depth) {
+    String str = "";
+    
+    if(componentType.equals("Button")) {
+      str += ButtonComponent.getEventHandlerClose(componentName, event, blockId, selectedBlockId, depth);
+    } else {
+      
+    }
+    
+    return str;
   }
   
   private String getProjectName() {
