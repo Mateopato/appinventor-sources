@@ -493,12 +493,15 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
     updatePropertiesPanel(selectedComponent);
     propertiesBox.setVisible(true);
     
+    // TODO: figure out why this isn't working for first page load
     // Set the code box's content.
-    CodeBox codeBox = CodeBox.getCodeBox();
-    codeBox.setContent(codePanel);
-    //codePanel.addCode("HAY I'M TESTING OVER HERE");
-    codePanel.addCode(encodeFormAsJsonString());
-    codeBox.setVisible(true);
+//    CodeBox codeBox = CodeBox.getCodeBox();
+//    codeBox.setContent(codePanel);
+//    //codePanel.addCode("HAY I'M TESTING OVER HERE");
+//    codePanel.addCode(encodeFormAsJsonString());
+//    codeBox.setVisible(true);
+      CodeBox codeBox = CodeBox.getCodeBox();
+      codeBox.setVisible(false);
 
     // Listen to changes on the form.
     form.addFormChangeListener(this);

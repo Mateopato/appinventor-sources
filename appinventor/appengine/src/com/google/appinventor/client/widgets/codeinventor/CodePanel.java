@@ -13,10 +13,16 @@ import java.util.TreeMap;
 
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.codeinventor.ButtonComponent;
+import com.google.appinventor.client.codeinventor.CIComponent;
+import com.google.appinventor.client.codeinventor.ClockComponent;
 import com.google.appinventor.client.codeinventor.HtmlWrapper;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
@@ -189,7 +195,7 @@ public class CodePanel extends Composite {
   
   // UI elements
   private final VerticalPanel panel;
-  private final Label componentName;
+//  private final Label componentName;
   private final DisclosurePanel firstHeader;
   private final DisclosurePanel secondHeader;
   private final ScrollPanel firstHeaderScrollPanel;
@@ -214,25 +220,30 @@ public class CodePanel extends Composite {
   //private Map<Integer, Node> nodeIdMap = new HashMap<Integer, Node>();
   
   private Map<String, Map<String, Node>> componentEvents = new TreeMap<String, Map<String, Node>>();
+  
+  private Map<String, CIComponent> componentHelperMap = new HashMap<String, CIComponent>();
     
   private boolean skipChildren = false;
+  
+  private int panelWidth = 320;
   
   /**
    * Creates a new Code Panel.
    */
   public CodePanel() {
-    int panelWidth = 330;
-    
     // TODO: move this to a function
     componentImportMap.put("Button", BUTTON_IMPORT_PATH);
     componentImportMap.put("Canvas", CANVAS_IMPORT_PATH);
+    
+    componentHelperMap.put("Button", new ButtonComponent());
+    componentHelperMap.put("Clock", new ClockComponent());
     
     // Initialize UI
     //ScrollPanel outerPanel = new ScrollPanel();
     VerticalPanel outerPanel = new VerticalPanel();
     outerPanel.setWidth(panelWidth + "px");
     
-    componentName = new Label("UI XML Code");  // TODO: fix this and next line
+//    componentName = new Label("UI XML Code");  // TODO: fix this and next line
     //componentName.setStyleName("ode-PropertiesComponentName");
     //outerPanel.add(componentName);
     
@@ -241,21 +252,24 @@ public class CodePanel extends Composite {
     //panel.setStylePrimaryName("ode-PropertiesPanel"); 
     outerPanel.add(panel);
     
-    firstHeader = new DisclosurePanel("UI XML Code");
+    firstHeader = new DisclosurePanel("Activity");
     //firstHeader.setStyleName("ode-PropertiesComponentName");  // TODO: create my own style
     secondHeader = new DisclosurePanel("Permissions");
     panel.add(firstHeader);
     panel.add(secondHeader);
     
+    int activityHeight = ((int) ((Window.getClientHeight() - VIEWER_WINDOW_OFFSET) * 8.5) / 10);
+    int permissionsHeight = ((int) ((Window.getClientHeight() - VIEWER_WINDOW_OFFSET) * 4) / 10);
+    
     firstHeaderScrollPanel = new ScrollPanel();
-    firstHeaderScrollPanel.setSize(panelWidth + "px", ((int) ((Window.getClientHeight() - VIEWER_WINDOW_OFFSET) * 8.5) / 10) + "px");
-    //firstHeaderScrollPanel.setSize("500px", ((Window.getClientHeight() - VIEWER_WINDOW_OFFSET) * 6 / 10) + "px");
+    firstHeaderScrollPanel.setSize(panelWidth + "px", activityHeight + "px");
     firstHeader.add(firstHeaderScrollPanel);
     
     secondHeaderScrollPanel = new ScrollPanel();
-    secondHeaderScrollPanel.setSize(panelWidth + "px", ((Window.getClientHeight() - VIEWER_WINDOW_OFFSET) * 1 / 10) + "px");
-    //secondHeaderScrollPanel.setSize("500px", ((Window.getClientHeight() - VIEWER_WINDOW_OFFSET) * 4 / 10) + "px");
+    secondHeaderScrollPanel.setSize(panelWidth + "px", permissionsHeight + "px");
     secondHeader.add(secondHeaderScrollPanel);
+    
+    setDisclosureHandlers();
     
     showXMLBox = new CheckBox("Click to hide XML");
     showXMLBox.setValue(true);
@@ -301,6 +315,63 @@ public class CodePanel extends Composite {
     secondHeaderScrollPanel.add(test1);
     
     initWidget(outerPanel);
+  }
+  
+  /**
+   * Recalculates heights of disclosure panels based on what is open/closed.
+   */
+  public void recalculateHeights() {
+    float firstHeightPercent = 1f;
+    float secondHeightPercent = 1f;
+    
+    if(firstHeader.isOpen() && secondHeader.isOpen()) {
+      firstHeightPercent = 5f;
+      secondHeightPercent = 4.5f;
+    } else if(firstHeader.isOpen()) {
+      firstHeightPercent = 8.5f;
+      secondHeightPercent = 1f;
+    } else if(secondHeader.isOpen()) {
+      firstHeightPercent = 1f;
+      secondHeightPercent = 8.5f;
+    }
+
+    int firstHeight = ((int) ((Window.getClientHeight() - VIEWER_WINDOW_OFFSET) * firstHeightPercent) / 10);
+    int secondHeight = ((int) ((Window.getClientHeight() - VIEWER_WINDOW_OFFSET) * secondHeightPercent) / 10);
+    firstHeaderScrollPanel.setSize(panelWidth + "px", firstHeight + "px");
+    secondHeaderScrollPanel.setSize(panelWidth + "px", secondHeight + "px");
+  }
+  
+  /**
+   * Initialize DisclosurePanel open/close handlers.
+   */
+  private void setDisclosureHandlers() {
+    firstHeader.addOpenHandler(new OpenHandler<DisclosurePanel>() {
+      @Override
+      public void onOpen(OpenEvent<DisclosurePanel> arg0) {
+        recalculateHeights();
+      }
+    });
+    
+    secondHeader.addOpenHandler(new OpenHandler<DisclosurePanel>() {
+      @Override
+      public void onOpen(OpenEvent<DisclosurePanel> arg0) {
+        recalculateHeights();
+      }
+    });
+    
+    firstHeader.addCloseHandler(new CloseHandler<DisclosurePanel>() {
+      @Override
+      public void onClose(CloseEvent<DisclosurePanel> arg0) {
+        recalculateHeights();
+      }
+    });
+    
+    secondHeader.addCloseHandler(new CloseHandler<DisclosurePanel>() {
+      @Override
+      public void onClose(CloseEvent<DisclosurePanel> arg0) {
+        recalculateHeights();
+      }
+    });
   }
   
   /**
@@ -2198,11 +2269,13 @@ public class CodePanel extends Composite {
     //TODO: import View
     String str = "";
     
-    if(componentType.equals("Button")) {
-      str += ButtonComponent.getEventHandlerSignature(componentName, event, blockId, selectedBlockId, depth);
-    } else {
-      
-    }
+    componentHelperMap.get(componentType).getEventHandlerSignature(componentName, event, blockId, selectedBlockId, depth);
+    
+//    if(componentType.equals("Button")) {
+//      str += ButtonComponent.getEventHandlerSignature(componentName, event, blockId, selectedBlockId, depth);
+//    } else {
+//      
+//    }
     
     return str;
   }
@@ -2210,11 +2283,13 @@ public class CodePanel extends Composite {
   private String getEventHandlerClose(String componentName, String componentType, String event, int blockId, int depth) {
     String str = "";
     
-    if(componentType.equals("Button")) {
-      str += ButtonComponent.getEventHandlerClose(componentName, event, blockId, selectedBlockId, depth);
-    } else {
-      
-    }
+    componentHelperMap.get(componentType).getEventHandlerClose(componentName, event, blockId, selectedBlockId, depth);
+    
+//    if(componentType.equals("Button")) {
+//      str += ButtonComponent.getEventHandlerClose(componentName, event, blockId, selectedBlockId, depth);
+//    } else {
+//      
+//    }
     
     return str;
   }
@@ -2261,9 +2336,11 @@ public class CodePanel extends Composite {
    */
   public void switchScreens(boolean blocks) {
     if(blocks) {
-      componentName.setText("Activity Code");
+//      componentName.setText("Activity Code");
+      firstHeader.setTitle("Activity Code");
     } else {
-      componentName.setText("UI XML Code");
+//      componentName.setText("UI XML Code");
+      firstHeader.setTitle("UI XML Code");
     }
   }
   

@@ -123,12 +123,13 @@ public final class YaBlocksEditor extends FileEditor
     // New layouts don't need all this messing; see comments on selected answer at: 
     // http://stackoverflow.com/questions/86901/creating-a-fluid-panel-in-gwt-to-fill-the-page
     blocksArea.setHeight(Window.getClientHeight() - VIEWER_WINDOW_OFFSET + "px");
-    Window.addResizeHandler(new ResizeHandler() {
-     public void onResize(ResizeEvent event) {
-       int height = event.getHeight();
-       blocksArea.setHeight(height - VIEWER_WINDOW_OFFSET + "px");
-     }
-    });
+    // TODO: moved this down below to also update CodePanel
+//    Window.addResizeHandler(new ResizeHandler() {
+//     public void onResize(ResizeEvent event) {
+//       int height = event.getHeight();
+//       blocksArea.setHeight(height - VIEWER_WINDOW_OFFSET + "px");
+//     }
+//    });
     initWidget(blocksArea);
 
     // Get references to the source structure explorer
@@ -167,6 +168,14 @@ public final class YaBlocksEditor extends FileEditor
     //.replaceAll(" (<[^/])", "\n$1")
     codeBox.setVisible(true);
     codePanel.setSize("100%", "100%");
+
+    Window.addResizeHandler(new ResizeHandler() {
+     public void onResize(ResizeEvent event) {
+       int height = event.getHeight();
+       blocksArea.setHeight(height - VIEWER_WINDOW_OFFSET + "px");
+       codePanel.recalculateHeights();
+     }
+    });
   }
 
   // FileEditor methods
@@ -254,7 +263,10 @@ public final class YaBlocksEditor extends FileEditor
       Ode.getInstance().getWorkColumns().insert(Ode.getInstance().getStructureAndAssets(), 1);
       Ode.getInstance().getStructureAndAssets().insert(BlockSelectorBox.getBlockSelectorBox(), 0);
       BlockSelectorBox.getBlockSelectorBox().setVisible(true);
+// TODO: add these back if I can figure out how to resize Code panel/box and expand viewer to the left.
+//      BlockSelectorBox.getBlockSelectorBox().setWidth("90%");
       AssetListBox.getAssetListBox().setVisible(true);
+//      AssetListBox.getAssetListBox().setWidth("90%");
       hideComponentBlocks();
     } else {
       OdeLog.wlog("Can't get form editor for blocks: " + getFileId());

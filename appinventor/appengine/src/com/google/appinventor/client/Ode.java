@@ -610,9 +610,12 @@ public class Ode implements EntryPoint {
     propertiesbox.setWidth("222px");
     workColumns.add(propertiesbox);
     
-    Box codebox = CodeBox.getCodeBox();  // TODO: this is where the codebox is added
-    codebox.setWidth("350px");
-    workColumns.add(codebox);
+    Box codeBox = CodeBox.getCodeBox();  // TODO: this is where the codebox is added
+    // this allows me to expand/collapse the code block
+//    codebox.setWidth("350px");
+    codeBox.setVisible(false);
+    codeBox.clear();
+    workColumns.add(codeBox);
     
     //switchToBlocksButton.setHeight("650px");
     //workColumns.add(switchToBlocksButton);

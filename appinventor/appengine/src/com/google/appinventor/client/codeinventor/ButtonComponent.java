@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ButtonComponent {
+public class ButtonComponent implements CIComponent {
   //private static final Map<String, String> eventNameMap;
   //private static final Map<String, String> eventParamsMap;
   
@@ -46,7 +46,8 @@ public class ButtonComponent {
 //    return eventParamsMap.get(aiEventName);
 //  }
   
-  public static String getEventHandlerSignature(String componentName, String event, int blockId, int selectedBlockId, int depth) {
+  @Override
+  public String getEventHandlerSignature(String componentName, String event, int blockId, int selectedBlockId, int depth) {
     String str = "";
     String returnType = "void";
     String handlerParam = "View componentView";
@@ -61,7 +62,8 @@ public class ButtonComponent {
     return str;
   }
   
-  public static String getEventHandlerClose(String componentName, String event, int blockId, int selectedBlockId, int depth) {
+  @Override
+  public String getEventHandlerClose(String componentName, String event, int blockId, int selectedBlockId, int depth) {
     String str = "";
     
     if(event.equals("LongClick")) str += "\n" + HtmlWrapper.indent(depth + 2) + HtmlWrapper.addCSSClass("return false;\n", HtmlWrapper.CONTROL_BLOCK_CSS_CLASS, blockId, selectedBlockId);
